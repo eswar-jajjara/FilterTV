@@ -32,7 +32,7 @@ public final class DomainFilter {
     }
     public String matchedRule(String host) {
         String value;
-        try { value = normalize(host); } catch (IllegalArgumentException e) { return null; }
+        try { value = normalizeRequestHost(host); } catch (IllegalArgumentException e) { return null; }
         String match = null;
         while (!value.isEmpty()) {
             if (allowed.contains(value)) return null;
@@ -42,6 +42,19 @@ public final class DomainFilter {
             value = value.substring(dot + 1);
         }
         return match;
+    }
+    private static String normalizeRequestHost(String host) {
+        if (host == null) return "";
+        String value = host.endsWith(".") ? host.substring(0, host.length() - 1) : host;
+        // OkHttp provides ASCII host names. Skip IDN conversion on this hot path.
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            if (!((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
+                    (ch >= '0' && ch <= '9') || ch == '.' || ch == '-')) {
+                return normalize(value);
+            }
+        }
+        return value.toLowerCase(Locale.ROOT);
     }
     public int size() { return blocked.size() + allowed.size(); }
 }
