@@ -213,9 +213,11 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     }
 
     private void initRowAndGridMapping() {
-        // Keep Home selected for guests while preserving a useful public feed on a fresh profile.
+        // A fresh guest profile may have no personalized Home feed. Prefer the
+        // mixed public trending feed instead of filling Home with music only.
         mRowMapping.put(MediaGroup.TYPE_HOME, getContentService().getHomeObserve()
-                .switchIfEmpty(getContentService().getMusicObserve()));
+                .switchIfEmpty(getContentService().getTrendingObserve()
+                        .switchIfEmpty(getContentService().getMusicObserve())));
         mRowMapping.put(MediaGroup.TYPE_TRENDING, getContentService().getTrendingObserve());
         mRowMapping.put(MediaGroup.TYPE_KIDS_HOME, getContentService().getKidsHomeObserve());
         mRowMapping.put(MediaGroup.TYPE_SPORTS, getContentService().getSportsObserve());
