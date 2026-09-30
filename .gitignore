@@ -33,6 +33,8 @@ Thumbs.db
 .gradle
 .google
 build/
+/bravefilter/target/
+/common/src/main/jniLibs/
 
 # my other stuff
 /smartyoutubetv2/release
