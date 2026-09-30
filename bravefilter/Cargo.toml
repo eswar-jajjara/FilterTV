@@ -1,0 +1,19 @@
+[package]
+name = "filtertv-adblock"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+
+[lib]
+name = "filtertv_adblock"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+adblock = { version = "=0.13.3", default-features = false, features = ["embedded-domain-resolver", "full-regex-handling"] }
+jni = "=0.21.1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
