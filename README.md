@@ -6,7 +6,7 @@ An experimental Android TV YouTube client based on **SmartTube**, with a separat
 
 YouTube browsing, search, sign-in, subscriptions, remote controls, playback and SponsorBlock are inherited from SmartTube. Ad-free YouTube behavior depends on its unofficial playback integration and ongoing upstream maintenance, not the domain filter. No guarantee is made for every video or TV.
 
-The TV home opens on recommendation rows, including for guests when the service provides them. The default sidebar puts Home, Shorts, Subscriptions, History and Playlists first, followed by other topics. Account switching, QR/code sign-in, search and watch controls use the inherited TV interface. This is a familiar layout, not an exact replica of the official YouTube app or its recommendation algorithm. The sign-in QR is rendered on-device so its one-time code is not sent to an external QR image service.
+The TV home opens on recommendation rows, including for guests when the service provides them. If a fresh profile receives no Home rows, it shows public Music rows while keeping Home selected. The default sidebar puts Home, Shorts, Subscriptions, History and Playlists first, followed by other topics. Account switching, QR/code sign-in, search and watch controls use the inherited TV interface. This is a familiar layout, not an exact replica of the official YouTube app or its recommendation algorithm. The sign-in QR is rendered on-device so its one-time code is not sent to an external QR image service.
 
 The added filter is an immutable Java domain matcher, **not Brave adblock-rust**. Rust/JNI, full Adblock syntax, downloaded lists, whole-app traffic filtering and a Compose/Media3 migration are future work. Do not import EasyList into this small prototype.
 
