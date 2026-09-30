@@ -6,7 +6,7 @@ An experimental Android TV YouTube client based on **SmartTube**, with Brave's o
 
 YouTube browsing, search, sign-in, subscriptions, remote controls, playback and SponsorBlock are inherited from SmartTube. Ad-free YouTube behavior depends on its unofficial playback integration and ongoing upstream maintenance. Network rules cannot identify ads stitched into an allowed video stream. No guarantee is made for every video or TV.
 
-The TV home opens on recommendation rows, including for guests when the service provides them. If a fresh profile receives no Home rows, it shows public Music rows while keeping Home selected. The default sidebar puts Home, Shorts, Subscriptions, History and Playlists first, followed by other topics. Account switching, QR/code sign-in, search and watch controls use the inherited TV interface. This is a familiar layout, not an exact replica of the official YouTube app or its recommendation algorithm. The sign-in QR is rendered on-device so its one-time code is not sent to an external QR image service.
+The TV home opens on recommendation rows, including for guests when the service provides them. If a fresh profile receives no Home rows, it tries public Trending rows before Music while keeping Home selected. The compact icon rail, search pill, red play-mark branding and player controls follow the familiar YouTube TV layout. The player settings panel groups Quality, Captions, Audio, Speed and Repeat next to a smaller video preview. Account switching, QR/code sign-in and recommendations still use the inherited SmartTube integration; personalized rows require signing in within FilterTV. This is a familiar layout, not an exact replica of the official YouTube app or its recommendation algorithm. The sign-in QR is rendered on-device so its one-time code is not sent to an external QR image service.
 
 The player filter uses Brave's `adblock-rust` 0.13.3 through JNI. It checks full request URLs using EasyList, EasyPrivacy, and optional personal rules. Lists download on first use and refresh every seven days when available. Until the first download finishes, only the supplied example rule is active. Rule compilation runs on a background thread; matching uses an immutable native engine. Cosmetic filtering is excluded to save memory because this is a native TV UI. Metadata, artwork, account, casting, and other upstream traffic are still outside this gate. FilterTV does not provide whole-TV or other-app filtering.
 
@@ -27,6 +27,8 @@ cargo test --manifest-path bravefilter/Cargo.toml --locked
 ```
 
 The flavor name is retained to minimize upstream merge conflicts. Package ID: `io.github.filtertv.app`. APKs appear in `smarttubetv/build/outputs/apk/stfdroid/debug/`. GitHub Actions builds the three native ABIs and debug APK artifacts on pushes and pull requests, and checks that each native library is packaged. CI is not a signed production release process. Keep signing keys private and use the same release key for all updates.
+
+The build applies `patches/sharedmodules-disable-debug-http-profiler.patch` to the pinned SmartTube submodule. Its debug HTTP profiler and BODY logger otherwise process video responses, which can add substantial playback overhead in test APKs. The patch does not by itself resolve every upstream playback failure; test the resulting APK on the target TV.
 
 ## Use
 
