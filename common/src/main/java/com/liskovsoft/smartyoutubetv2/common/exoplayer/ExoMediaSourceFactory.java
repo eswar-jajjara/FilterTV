@@ -126,9 +126,8 @@ public class ExoMediaSourceFactory {
         PlayerTweaksData tweaksData = PlayerTweaksData.instance(mContext);
         int source = tweaksData.getPlayerDataSource();
         DefaultBandwidthMeter bandwidthMeter = useBandwidthMeter ? BANDWIDTH_METER : null;
-        return source == PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP ? buildOkHttpDataSourceFactory(bandwidthMeter) :
-                        source == PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET && CronetManager.getEngine(mContext) != null ? buildCronetDataSourceFactory(bandwidthMeter) :
-                                buildDefaultHttpDataSourceFactory(bandwidthMeter);
+        // One media transport prevents alternate data sources bypassing the filter.
+        return buildOkHttpDataSourceFactory(bandwidthMeter);
     }
 
     @SuppressWarnings("deprecation")
@@ -275,7 +274,7 @@ public class ExoMediaSourceFactory {
      * Use OkHttp for networking
      */
     private HttpDataSource.Factory buildOkHttpDataSourceFactory(DefaultBandwidthMeter bandwidthMeter) {
-        OkHttpDataSourceFactory dataSourceFactory = new OkHttpDataSourceFactory(OkHttpManager.instance().getClient(), USER_AGENT,
+        OkHttpDataSourceFactory dataSourceFactory = new OkHttpDataSourceFactory(com.liskovsoft.smartyoutubetv2.common.filter.FilterNetwork.wrap(mContext, OkHttpManager.instance().getClient()), USER_AGENT,
                 bandwidthMeter);
         addCommonHeaders(dataSourceFactory);
         return dataSourceFactory;
