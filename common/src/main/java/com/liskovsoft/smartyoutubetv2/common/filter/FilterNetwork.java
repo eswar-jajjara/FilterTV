@@ -26,7 +26,10 @@ public final class FilterNetwork {
     private static final int MAX_LIST_BYTES = 8 * 1024 * 1024;
     private static final long REFRESH_MS = 7L * 24 * 60 * 60 * 1000;
     private static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
-        Thread thread = new Thread(r, "FilterTV-lists");
+        Thread thread = new Thread(() -> {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            r.run();
+        }, "FilterTV-lists");
         thread.setDaemon(true);
         return thread;
     });
