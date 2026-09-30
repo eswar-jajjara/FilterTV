@@ -189,7 +189,6 @@ public class BrowseFragment extends BrowseSupportFragment implements BrowseView 
         setHeadersTransitionOnBackEnabled(true);
 
         int brandColorRes = Helpers.getThemeAttr(getContext(), R.attr.brandColor);
-        int brandAccentColorRes = Helpers.getThemeAttr(getContext(), R.attr.brandAccentColor);
 
         updateBadge();
 
@@ -200,7 +199,7 @@ public class BrowseFragment extends BrowseSupportFragment implements BrowseView 
         setBrandColor(ContextCompat.getColor(getContext(), brandColorRes));
 
         // Set search icon color.
-        setSearchAffordanceColor(ContextCompat.getColor(getContext(), brandAccentColorRes));
+        setSearchAffordanceColor(ContextCompat.getColor(getContext(), R.color.filtertv_search_orb));
 
         setHeaderPresenterSelector(new PresenterSelector() {
             private final Map<Integer, Presenter> mPresenterMap = new HashMap<>();
