@@ -74,6 +74,11 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     public void show() {
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
+        settingsPresenter.appendSingleButton(UiOptionItem.from("FilterLab", option -> {
+            android.content.Intent intent = new android.content.Intent(getContext(), com.liskovsoft.smartyoutubetv2.common.filter.FilterLabActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        }));
         appendBootToSection(settingsPresenter);
         appendEnabledSections(settingsPresenter);
         appendContextMenuItemsCategory(settingsPresenter);
