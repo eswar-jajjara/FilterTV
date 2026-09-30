@@ -76,6 +76,10 @@ pub extern "system" fn Java_com_liskovsoft_smartyoutubetv2_common_filter_BraveFi
     let Ok(method) = env.get_string(&method) else {
         return 0;
     };
+    let url: String = url.into();
+    let source: String = source.into();
+    let request_type: String = request_type.into();
+    let method: String = method.into();
     u8::from(should_block(&url, &source, &request_type, &method))
 }
 
