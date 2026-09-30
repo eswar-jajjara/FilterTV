@@ -5,7 +5,7 @@ import okhttp3.Interceptor;
 import okhttp3.Response;
 
 public final class FilterInterceptor implements Interceptor {
-    public interface Policy { DomainFilter activeFilter(); }
+    public interface Policy { boolean shouldBlock(String url, String method); }
     private final Policy policy;
     private final AtomicLong evaluated;
     private final AtomicLong blocked;
@@ -13,14 +13,10 @@ public final class FilterInterceptor implements Interceptor {
         this.policy = policy; this.evaluated = evaluated; this.blocked = blocked;
     }
     @Override public Response intercept(Chain chain) throws IOException {
-        DomainFilter filter = policy.activeFilter();
-        if (filter != null) {
-            evaluated.incrementAndGet();
-            String rule = filter.matchedRule(chain.request().url().host());
-            if (rule != null) {
-                blocked.incrementAndGet();
-                throw new IOException("FilterTV blocked media request: " + rule);
-            }
+        evaluated.incrementAndGet();
+        if (policy.shouldBlock(chain.request().url().toString(), chain.request().method())) {
+            blocked.incrementAndGet();
+            throw new IOException("FilterTV blocked media request");
         }
         return chain.proceed(chain.request());
     }
