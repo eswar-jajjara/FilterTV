@@ -61,6 +61,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
     private DateTimeView mGlobalClock;
     private DateTimeView mGlobalDate;
     private SearchOrbView mSearchOrbView;
+    private View mSearchPill;
     private boolean mInitDone;
     private int mFlags = FULL_VIEW_VISIBLE;
     private int mIconWidth;
@@ -152,6 +153,8 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
             mSearchOrbView.setVisibility(View.GONE);
         }
 
+        mSearchPill.setVisibility(mIsSearchOrbEnabled ? View.GONE : mSearchVisibility);
+
         if (mIsAccountViewEnabled) {
             mAccountView.setVisibility(mSearchVisibility);
         }
@@ -193,6 +196,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         MainUIData mainUIData = MainUIData.instance(getContext());
 
         mSearchOrbView = findViewById(R.id.title_orb);
+        mSearchPill = findViewById(R.id.filtertv_search_pill);
 
         mAccountView = findViewById(R.id.account_orb);
         mAccountView.setOnOrbClickedListener(v -> AccountSelectionPresenter.instance(getContext()).nextAccountOrDialog());
@@ -229,9 +233,12 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         mIsSearchOrbEnabled = !mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_SEARCH);
         mIsAccountViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_BROWSE_ACCOUNTS);
         mIsLanguageViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_CHANGE_LANGUAGE);
-        mIsGlobalClockEnabled = GeneralData.instance(getContext()).isGlobalClockEnabled();
+        // Keep browsing focused on videos; the playback clock preference is
+        // still honored in the player controls.
+        mIsGlobalClockEnabled = false;
 
         mSearchOrbView.setVisibility(mIsSearchOrbEnabled ? View.VISIBLE : View.GONE);
+        mSearchPill.setVisibility(mIsSearchOrbEnabled ? View.GONE : mSearchVisibility);
         mAccountView.setVisibility(mIsAccountViewEnabled ? View.VISIBLE : View.GONE);
         mLanguageView.setVisibility(mIsLanguageViewEnabled ? View.VISIBLE : View.GONE);
         mGlobalClock.setVisibility(mIsGlobalClockEnabled ? View.VISIBLE : View.GONE);
