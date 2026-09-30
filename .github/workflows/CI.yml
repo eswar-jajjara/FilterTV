@@ -13,6 +13,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Disable debug HTTP body capture in SharedModules
+        run: git -C SharedModules apply ../patches/sharedmodules-disable-debug-http-profiler.patch
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
