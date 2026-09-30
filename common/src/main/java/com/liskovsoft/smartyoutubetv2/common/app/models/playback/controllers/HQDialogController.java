@@ -46,7 +46,52 @@ public class HQDialogController extends BasePlayerController {
     private void onHighQualityClicked() {
         fitVideoIntoDialog();
 
-        addQualityCategories();
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_quality), item -> showFormatDialog(true)));
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_captions), item -> showCaptionsDialog()));
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_audio), item -> showFormatDialog(false)));
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_speed), item -> {
+            mAppDialogPresenter.appendCategory(AppDialogUtil.createSpeedListCategory(getContext(), getPlayer()));
+            mAppDialogPresenter.showDialog();
+        }));
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_repeat), item -> {
+            OptionCategory category = AppDialogUtil.createPlaybackModeCategory(getContext(),
+                    () -> getPlayer().setButtonState(R.id.action_repeat, getPlayerData().getPlaybackMode()));
+            mAppDialogPresenter.appendRadioCategory(category.title, category.options);
+            mAppDialogPresenter.showDialog();
+        }));
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.playback_settings), item -> showAdvancedSettings()));
+
+        mAppDialogPresenter.showDialog(getContext().getString(R.string.filtertv_player_settings), this::onDialogHide);
+    }
+
+    private void showFormatDialog(boolean video) {
+        if (getPlayer() == null) {
+            return;
+        }
+        List<FormatItem> formats = video ? getPlayer().getVideoFormats() : getPlayer().getAudioFormats();
+        String title = getContext().getString(video ? R.string.filtertv_quality : R.string.filtertv_audio);
+        mAppDialogPresenter.appendRadioCategory(title,
+                UiOptionItem.from(formats, this::selectFormatOption, getContext().getString(R.string.filtertv_auto)));
+        mAppDialogPresenter.showDialog();
+    }
+
+    private void showCaptionsDialog() {
+        if (getPlayer() == null) {
+            return;
+        }
+        mAppDialogPresenter.appendRadioCategory(getContext().getString(R.string.filtertv_captions),
+                UiOptionItem.from(getPlayer().getSubtitleFormats(), option -> {
+                    FormatItem format = UiOptionItem.toFormat(option);
+                    getPlayer().setFormat(format);
+                    getPlayerData().setFormat(format);
+                }, getContext().getString(R.string.subtitles_disabled)));
+        mAppDialogPresenter.showDialog();
+    }
+
+    private void showAdvancedSettings() {
+        mCategories.clear();
+        mCategoriesInt.clear();
+
         addAudioLanguage();
         addPresetsCategory();
         addVideoZoomCategory();
@@ -60,7 +105,7 @@ public class HQDialogController extends BasePlayerController {
         appendOptions(mCategoriesInt);
         appendOptions(mCategories);
 
-        mAppDialogPresenter.showDialog(getContext().getString(R.string.playback_settings), this::onDialogHide);
+        mAppDialogPresenter.showDialog();
     }
 
     private void addQualityCategories() {

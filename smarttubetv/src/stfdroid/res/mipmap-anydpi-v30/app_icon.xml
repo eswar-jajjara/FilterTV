@@ -1,5 +1,2 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="96dp" android:height="96dp" android:viewportWidth="96" android:viewportHeight="96">
-<path android:fillColor="#121824" android:pathData="M0,0H96V96H0Z"/>
-<path android:fillColor="#48E5C2" android:pathData="M22,22H74V32H22Z M22,43H60V53H22Z M22,64H46V74H22Z"/>
-<path android:fillColor="#FFFFFF" android:pathData="M65,43L85,58L65,73Z"/>
-</vector>
+<?xml version="1.0" encoding="utf-8"?>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android" android:src="@mipmap/filtertv_icon_art" android:gravity="fill" />

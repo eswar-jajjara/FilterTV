@@ -1,0 +1,46 @@
+diff --git a/sharedutils/src/main/java/com/liskovsoft/sharedutils/okhttp/OkHttpCommons.java b/sharedutils/src/main/java/com/liskovsoft/sharedutils/okhttp/OkHttpCommons.java
+index 60f338b..402ed7b 100644
+--- a/sharedutils/src/main/java/com/liskovsoft/sharedutils/okhttp/OkHttpCommons.java
++++ b/sharedutils/src/main/java/com/liskovsoft/sharedutils/okhttp/OkHttpCommons.java
+@@ -318,15 +318,15 @@ final class OkHttpCommons {
+     }
+ 
+     private static void debugSetup(OkHttpClient.Builder okBuilder) {
+-        if (BuildConfig.DEBUG) {
+-            // Profiler could cause OutOfMemoryError when testing.
+-            // Also outputs to logcat tons of info.
+-            // If you enable it to all requests - expect slowdowns.
+-            if (enableProfiler) {
+-                addProfiler(okBuilder);
+-            }
+-            addLogger(okBuilder);
+-        }
++        if (BuildConfig.DEBUG) {
++            // Profiler could cause OutOfMemoryError when testing.
++            // Also outputs to logcat tons of info.
++            // If you enable it to all requests - expect slowdowns.
++            if (enableProfiler) {
++                addProfiler(okBuilder);
++                addLogger(okBuilder);
++            }
++        }
+     }
+ 
+     private static void addProfiler(OkHttpClient.Builder okBuilder) {
+diff --git a/sharedutils/src/main/java/com/liskovsoft/sharedutils/okhttp/OkHttpManager.java b/sharedutils/src/main/java/com/liskovsoft/sharedutils/okhttp/OkHttpManager.java
+index 7bae6b6..6e3b036 100644
+--- a/sharedutils/src/main/java/com/liskovsoft/sharedutils/okhttp/OkHttpManager.java
++++ b/sharedutils/src/main/java/com/liskovsoft/sharedutils/okhttp/OkHttpManager.java
+@@ -24,8 +24,10 @@ public class OkHttpManager {
+         mEnableProfiler = enableProfiler;
+     }
+ 
+-    public static OkHttpManager instance() {
+-        return instance(true); // profiler is enabled by default
++    public static OkHttpManager instance() {
++        // The TV debug APK is used for real playback. Capturing every video
++        // response body in the profiler can stall streams and exhaust memory.
++        return instance(false);
+     }
+ 
+     public static OkHttpManager instance(boolean enableProfiler) {

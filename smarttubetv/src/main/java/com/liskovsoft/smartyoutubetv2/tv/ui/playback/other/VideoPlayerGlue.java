@@ -139,15 +139,12 @@ public class VideoPlayerGlue extends MaxControlsVideoPlayerGlue<PlayerAdapter> i
     @Override
     protected void onCreatePrimaryActions(ArrayObjectAdapter adapter) {
         // Order matters, super.onCreatePrimaryActions() will create the play / pause action.
-        // Will display as follows:
-        // play/pause, previous, rewind, fast forward, next
-        //   > /||      |<        <<        >>         >|
-        if (mPlayerTweaksData.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_PLAY_PAUSE)) {
-            super.onCreatePrimaryActions(adapter);
-        }
-
+        // Keep the transport controls in the familiar previous / play / next order.
         if (mPlayerTweaksData.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_PREVIOUS)) {
             adapter.add(mSkipPreviousAction);
+        }
+        if (mPlayerTweaksData.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_PLAY_PAUSE)) {
+            super.onCreatePrimaryActions(adapter);
         }
         //adapter.add(mRewindAction);
         //adapter.add(mFastForwardAction);
