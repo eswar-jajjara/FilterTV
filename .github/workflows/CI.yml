@@ -18,14 +18,26 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v4
+      - uses: dtolnay/rust-toolchain@stable
       - name: Install pinned Android packages
         run: sdkmanager "platforms;android-34" "build-tools;30.0.3" "ndk;21.0.6113669"
+      - name: Test Brave network matcher
+        run: cargo test --manifest-path bravefilter/Cargo.toml --locked
+      - name: Build Brave Android libraries
+        run: bash tools/build-brave-native.sh
       - name: Test request filtering
         run: python3 tools/test-filter.py
       - name: Build debug APK
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon assembleStfdroidDebug
+      - name: Verify Brave library is packaged for each supported ABI
+        run: |
+          apk=$(find smarttubetv/build/outputs/apk/stfdroid/debug -name '*universal*.apk' -print -quit)
+          test -n "$apk"
+          for abi in arm64-v8a armeabi-v7a x86; do
+            unzip -l "$apk" "lib/$abi/libfiltertv_adblock.so" | grep -q libfiltertv_adblock.so
+          done
       - name: Lint
         run: ./gradlew --no-daemon lintStfdroidDebug
       - uses: actions/upload-artifact@v4
