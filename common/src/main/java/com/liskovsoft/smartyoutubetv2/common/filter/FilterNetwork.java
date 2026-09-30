@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
@@ -135,7 +134,7 @@ public final class FilterNetwork {
                     File target = listFile(context, LIST_FILES[i]);
                     File temp = new File(target.getPath() + ".new");
                     try (FileOutputStream output = new FileOutputStream(temp)) {
-                        output.write(list.getBytes(StandardCharsets.UTF_8));
+                        output.write(list.getBytes("UTF-8"));
                     }
                     if (!temp.renameTo(target)) throw new IOException("Could not replace list");
                     updated++;
