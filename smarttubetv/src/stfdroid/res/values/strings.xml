@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string translatable="false" name="app_name"><![CDATA[SmartTube F-Droid]]></string>
-    <string translatable="false" name="browse_title"><![CDATA[SmartTube F-Droid]]></string>
+    <string translatable="false" name="app_name"><![CDATA[FilterTV]]></string>
+    <string translatable="false" name="browse_title"><![CDATA[FilterTV]]></string>
+    <string name="signin_view_title">Loading sign-in code…</string>
+    <string name="signin_view_description">On your phone or computer, open %s and enter the code shown here.</string>
+    <string name="signin_view_action_text">Back to videos</string>
+    <string name="login_from_browser">Open activation page</string>
 </resources>
