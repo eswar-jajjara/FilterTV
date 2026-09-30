@@ -26,7 +26,7 @@ public final class FilterTests {
             check(rejected, "reject unsupported rule " + invalid);
         }
         AtomicLong evaluated = new AtomicLong(), blocked = new AtomicLong();
-        FilterInterceptor gate = new FilterInterceptor(() -> f, evaluated, blocked);
+        FilterInterceptor gate = new FilterInterceptor((url, method) -> f.matchedRule(HttpUrl.parse(url).host()) != null, evaluated, blocked);
         AtomicLong dnsCalls = new AtomicLong();
         OkHttpClient client = new OkHttpClient.Builder().dns(host -> {
             dnsCalls.incrementAndGet(); return Collections.singletonList(InetAddress.getByName("127.0.0.1"));
