@@ -10,6 +10,7 @@
     <color name="fastlane_background_dark">#004B53</color>
     <color name="default_light_grey">#343434</color>
     <color name="search_opaque">#0096a6</color>
+    <color name="filtertv_search_orb">#404048</color>
     <color name="search_opaque_yellow">#ffaa3f</color>
 
     <!-- Card view colors -->
