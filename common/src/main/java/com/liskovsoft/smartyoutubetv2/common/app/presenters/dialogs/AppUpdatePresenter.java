@@ -49,6 +49,10 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
     }
 
     public void start(boolean forceCheck) {
+        if ("io.github.filtertv.app".equals(getContext().getPackageName())) {
+            if (forceCheck) MessageHelpers.showLongMessage(getContext(), "FilterTV updates are installed manually from your own GitHub builds.");
+            return;
+        }
         mIsForceCheck = forceCheck;
 
         if (forceCheck) {
