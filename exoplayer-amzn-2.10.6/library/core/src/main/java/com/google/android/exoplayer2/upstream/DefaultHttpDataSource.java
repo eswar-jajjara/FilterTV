@@ -79,6 +79,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
   private final @Nullable Predicate<String> contentTypePredicate;
   private final @Nullable RequestProperties defaultRequestProperties;
   private final RequestProperties requestProperties;
+  private @Nullable RequestUrlGate requestUrlGate;
 
   private @Nullable DataSpec dataSpec;
   private @Nullable HttpURLConnection connection;
@@ -165,6 +166,11 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     this.readTimeoutMillis = readTimeoutMillis;
     this.allowCrossProtocolRedirects = allowCrossProtocolRedirects;
     this.defaultRequestProperties = defaultRequestProperties;
+  }
+
+  /** Sets a gate for the initial URL and each redirect before the connection is opened. */
+  public void setRequestUrlGate(@Nullable RequestUrlGate requestUrlGate) {
+    this.requestUrlGate = requestUrlGate;
   }
 
   /**
@@ -444,7 +450,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     boolean allowGzip = dataSpec.isFlagSet(DataSpec.FLAG_ALLOW_GZIP);
     boolean allowIcyMetadata = dataSpec.isFlagSet(DataSpec.FLAG_ALLOW_ICY_METADATA);
 
-    if (!allowCrossProtocolRedirects) {
+    if (!allowCrossProtocolRedirects && requestUrlGate == null) {
       // HttpURLConnection disallows cross-protocol redirects, but otherwise performs redirection
       // automatically. This is the behavior we want, so use it.
       return makeConnection(
@@ -461,6 +467,9 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     // We need to handle redirects ourselves to allow cross-protocol redirects.
     int redirectCount = 0;
     while (redirectCount++ <= MAX_REDIRECTS) {
+      if (requestUrlGate != null) {
+        requestUrlGate.checkRequest(url.toString(), DataSpec.getStringForHttpMethod(httpMethod));
+      }
       HttpURLConnection connection =
           makeConnection(
               url,
@@ -585,7 +594,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
    * @return The next URL.
    * @throws IOException If redirection isn't possible.
    */
-  private static URL handleRedirect(URL originalUrl, String location) throws IOException {
+  private URL handleRedirect(URL originalUrl, String location) throws IOException {
     if (location == null) {
       throw new ProtocolException("Null location redirect");
     }
@@ -596,13 +605,10 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     if (!"https".equals(protocol) && !"http".equals(protocol)) {
       throw new ProtocolException("Unsupported protocol redirect: " + protocol);
     }
-    // Currently this method is only called if allowCrossProtocolRedirects is true, and so the code
-    // below isn't required. If we ever decide to handle redirects ourselves when cross-protocol
-    // redirects are disabled, we'll need to uncomment this block of code.
-    // if (!allowCrossProtocolRedirects && !protocol.equals(originalUrl.getProtocol())) {
-    //   throw new ProtocolException("Disallowed cross-protocol redirect ("
-    //       + originalUrl.getProtocol() + " to " + protocol + ")");
-    // }
+    if (!allowCrossProtocolRedirects && !protocol.equals(originalUrl.getProtocol())) {
+      throw new ProtocolException("Disallowed cross-protocol redirect ("
+          + originalUrl.getProtocol() + " to " + protocol + ")");
+    }
     return url;
   }
 

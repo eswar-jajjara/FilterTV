@@ -28,6 +28,7 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
   private final int connectTimeoutMillis;
   private final int readTimeoutMillis;
   private final boolean allowCrossProtocolRedirects;
+  private @Nullable RequestUrlGate requestUrlGate;
 
   /**
    * Constructs a DefaultHttpDataSourceFactory. Sets {@link
@@ -101,6 +102,12 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
     this.allowCrossProtocolRedirects = allowCrossProtocolRedirects;
   }
 
+  /** Sets a gate for the initial URL and every redirect followed by created data sources. */
+  public DefaultHttpDataSourceFactory setRequestUrlGate(@Nullable RequestUrlGate requestUrlGate) {
+    this.requestUrlGate = requestUrlGate;
+    return this;
+  }
+
   @Override
   protected DefaultHttpDataSource createDataSourceInternal(
       HttpDataSource.RequestProperties defaultRequestProperties) {
@@ -112,6 +119,7 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
             readTimeoutMillis,
             allowCrossProtocolRedirects,
             defaultRequestProperties);
+    dataSource.setRequestUrlGate(requestUrlGate);
     if (listener != null) {
       dataSource.addTransferListener(listener);
     }
