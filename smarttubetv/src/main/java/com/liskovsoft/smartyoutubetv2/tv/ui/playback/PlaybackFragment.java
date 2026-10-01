@@ -841,6 +841,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
             mPlayerGlue.setTitle(video.getTitleFull() != null ? video.getTitleFull() : "...");
             mPlayerGlue.setSubtitle(video.getSecondTitleFull() != null ? createSubtitle(video) : "...");
             mPlayerGlue.setVideo(video);
+            updateFilterTvHeader(video.getTitleFull(), video.getSecondTitleFull());
         }
     }
 
@@ -852,6 +853,20 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     @Override
     public void showBackgroundColor(int colorResId) {
         mBackgroundManager.showBackgroundColor(colorResId);
+    }
+
+    private void updateFilterTvHeader(CharSequence title, CharSequence subtitle) {
+        if (getView() == null) return;
+        android.widget.TextView titleView = getView().findViewById(R.id.filtertv_player_title);
+        android.widget.TextView subtitleView = getView().findViewById(R.id.filtertv_player_subtitle);
+        if (titleView != null) titleView.setText(title);
+        if (subtitleView != null) subtitleView.setText(subtitle);
+    }
+
+    private void setFilterTvHeaderVisible(boolean visible) {
+        if (getView() == null) return;
+        View header = getView().findViewById(R.id.filtertv_player_header);
+        if (header != null) header.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     private CharSequence createSubtitle(Video video) {
@@ -896,6 +911,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     @Override
     public void setTitle(String title) {
         mPlayerGlue.setTitle(title);
+        updateFilterTvHeader(title, getVideo() != null ? getVideo().getSecondTitleFull() : null);
     }
 
     @Override
@@ -1226,6 +1242,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     @Override
     public void showControlsOverlay(boolean runAnimation) {
         super.showControlsOverlay(mIsUIAnimationsEnabled);
+        setFilterTvHeaderVisible(true);
 
         // Do throttle. Called so many times. Rely on boxing because initial state is unknown.
         if (mIsControlsShownPreviously != null && mIsControlsShownPreviously) {
@@ -1248,6 +1265,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     @Override
     public void hideControlsOverlay(boolean runAnimation) {
         super.hideControlsOverlay(mIsUIAnimationsEnabled);
+        setFilterTvHeaderVisible(false);
 
         // Do throttle. Called so many times. Rely on boxing because initial state is unknown.
         if (mIsControlsShownPreviously != null && !mIsControlsShownPreviously) {
