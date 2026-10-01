@@ -1092,8 +1092,10 @@ public class BrowseSupportFragment extends BaseSupportFragment {
             }
             if (DEBUG) Log.v(TAG, "onFocusSearch focused " + focused + " + direction " + direction);
 
-            if (getTitleView() != null && focused != getTitleView()
-                    && direction == View.FOCUS_UP) {
+            if (getTitleView() != null && !getTitleView().hasFocus()
+                    && direction == View.FOCUS_UP
+                    && (mShowingHeaders ? mHeadersSupportFragment.getSelectedPosition() == 0
+                        : getTitleView().getVisibility() == View.VISIBLE)) {
                 return getTitleView();
             }
             if (getTitleView() != null && getTitleView().hasFocus()
@@ -1341,6 +1343,7 @@ public class BrowseSupportFragment extends BaseSupportFragment {
                 mShowingHeaders
                         ? R.transition.lb_browse_headers_in : R.transition.lb_browse_headers_out);
 
+        if (mPersistentHeadersEnabled) TransitionHelper.setDuration(mHeadersTransition, 180);
         TransitionHelper.addTransitionListener(mHeadersTransition, new TransitionListener() {
             @Override
             public void onTransitionStart(Object transition) {
@@ -1458,6 +1461,10 @@ public class BrowseSupportFragment extends BaseSupportFragment {
         containerList = mHeadersSupportFragment.getView();
         lp = (MarginLayoutParams) containerList.getLayoutParams();
         lp.setMarginStart(onScreen || mPersistentHeadersEnabled ? 0 : -mContainerListMarginStart);
+        if (mPersistentHeadersEnabled) {
+            lp.width = onScreen ? getResources().getDimensionPixelSize(R.dimen.lb_browse_headers_width)
+                    : (int) (64 * getResources().getDisplayMetrics().density + 0.5f);
+        }
         containerList.setLayoutParams(lp);
     }
 
@@ -1470,7 +1477,8 @@ public class BrowseSupportFragment extends BaseSupportFragment {
 
     private void expandMainFragment(boolean expand) {
         MarginLayoutParams params = (MarginLayoutParams) mScaleFrameLayout.getLayoutParams();
-        params.setMarginStart(!expand || mPersistentHeadersEnabled ? mContainerListMarginStart : 0);
+        params.setMarginStart(!expand ? mContainerListMarginStart : mPersistentHeadersEnabled
+                ? (int) (72 * getResources().getDisplayMetrics().density + 0.5f) : 0);
         mScaleFrameLayout.setLayoutParams(params);
         mMainFragmentAdapter.setExpand(expand);
 
