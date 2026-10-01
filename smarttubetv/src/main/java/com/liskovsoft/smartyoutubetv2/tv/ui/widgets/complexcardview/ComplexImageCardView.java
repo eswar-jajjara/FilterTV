@@ -41,6 +41,10 @@ public class ComplexImageCardView extends ImageCardView {
         mHandler = new Handler(Looper.getMainLooper());
     }
 
+    public void setThumbnailSelected(boolean selected) {
+        if (mComplexImageView != null) mComplexImageView.setSelected(selected);
+    }
+
     private void enableTitleAnimation(boolean enable) {
         enableTextAnimation(findViewById(R.id.title_text), enable);
     }
@@ -140,7 +144,7 @@ public class ComplexImageCardView extends ImageCardView {
         }
 
         titleView.setMaxLines(lines);
-        titleView.setLines(lines);
+        titleView.setMinLines(1);
     }
 
     public void setContentLinesNum(int lines) {
@@ -151,7 +155,7 @@ public class ComplexImageCardView extends ImageCardView {
         }
 
         contentView.setMaxLines(lines);
-        contentView.setLines(lines);
+        contentView.setMinLines(1);
     }
 
     public void enableBadge(boolean enabled) {
