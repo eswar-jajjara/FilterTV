@@ -595,7 +595,7 @@ public class TrackSelectorManager implements TrackSelectorCallback {
      * Trying to filter languages preferred by the user
      */
     private MediaTrack[][] filterByLanguage(MediaTrack[][] trackGroupList, MediaTrack originTrack) {
-        if (!(originTrack instanceof AudioTrack) || trackGroupList.length <= 2) { // non-translated list has max 2 groups
+        if (!(originTrack instanceof AudioTrack)) { // Translated audio can be present in just two groups.
             return trackGroupList;
         }
 

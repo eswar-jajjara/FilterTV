@@ -70,8 +70,17 @@ public class HQDialogController extends BasePlayerController {
     private CharSequence formatSummary(FormatItem format) {
         if (format == null) return "";
         if (format.isDefault()) return getContext().getString(R.string.option_disabled);
-        if (format.getType() == FormatItem.TYPE_VIDEO && format.getHeight() > 0) return format.getHeight() + "p";
+        if (format.getType() == FormatItem.TYPE_VIDEO && format.getHeight() > 0) return resolution(format) + "p";
+        if (format.getType() == FormatItem.TYPE_AUDIO) {
+            String language = format.getLanguage();
+            if (language == null || language.isEmpty()) return getContext().getString(R.string.filtertv_original_audio);
+            return language;
+        }
         return format.getTitle();
+    }
+
+    private static int resolution(FormatItem format) {
+        return format.getWidth() > 0 ? Math.min(format.getWidth(), format.getHeight()) : format.getHeight();
     }
 
     private void showFormatDialog(boolean video) {
@@ -80,8 +89,37 @@ public class HQDialogController extends BasePlayerController {
         }
         List<FormatItem> formats = video ? getPlayer().getVideoFormats() : getPlayer().getAudioFormats();
         String title = getContext().getString(video ? R.string.filtertv_quality : R.string.filtertv_audio);
-        mAppDialogPresenter.appendRadioCategory(title,
-                UiOptionItem.from(formats, this::selectFormatOption, getContext().getString(R.string.option_disabled)));
+        if (video) {
+            java.util.Map<Integer, FormatItem> resolutions = new java.util.LinkedHashMap<>();
+            if (formats != null) for (FormatItem format : formats) {
+                if (format.isDefault() || format.getHeight() <= 0) continue;
+                FormatItem previous = resolutions.get(resolution(format));
+                if (previous == null || format.isSelected()) resolutions.put(resolution(format), format);
+            }
+            List<OptionItem> options = new java.util.ArrayList<>();
+            for (FormatItem format : resolutions.values()) {
+                OptionItem detailed = UiOptionItem.from(format, this::selectFormatOption);
+                options.add(UiOptionItem.from(resolution(format) + "p", ignored -> selectFormatOption(detailed), format.isSelected()));
+            }
+            mAppDialogPresenter.appendRadioCategory(title, options);
+        } else {
+            List<OptionItem> options = new java.util.ArrayList<>();
+            options.add(UiOptionItem.from(getContext().getString(R.string.filtertv_original_audio), ignored -> {
+                getPlayerData().setAudioLanguage("");
+                getPlayer().setFormat(getPlayerData().getFormat(FormatItem.TYPE_AUDIO));
+            }, getPlayerData().getAudioLanguage().isEmpty()));
+            java.util.Set<String> languages = new java.util.LinkedHashSet<>();
+            if (formats != null) for (FormatItem format : formats) {
+                String language = format.getLanguage();
+                if (format.isDefault() || language == null || language.contains("original") || !languages.add(language)) continue;
+                OptionItem detailed = UiOptionItem.from(format, this::selectFormatOption);
+                options.add(UiOptionItem.from(language, ignored -> {
+                    getPlayerData().setAudioLanguage(language.split(" ")[0]);
+                    selectFormatOption(detailed);
+                }, format.isSelected()));
+            }
+            mAppDialogPresenter.appendRadioCategory(title, options);
+        }
         mAppDialogPresenter.showDialog();
     }
 
@@ -102,6 +140,10 @@ public class HQDialogController extends BasePlayerController {
         mCategoriesInt.clear();
 
         addAudioLanguage();
+        mCategoriesInt.put(-1001, OptionCategory.radioList(getContext().getString(R.string.filtertv_quality),
+                UiOptionItem.from(getPlayer().getVideoFormats(), this::selectFormatOption, getContext().getString(R.string.option_disabled))));
+        mCategoriesInt.put(-1002, OptionCategory.radioList(getContext().getString(R.string.filtertv_audio),
+                UiOptionItem.from(getPlayer().getAudioFormats(), this::selectFormatOption, getContext().getString(R.string.option_disabled))));
         addPresetsCategory();
         addVideoZoomCategory();
         addNetworkEngine();

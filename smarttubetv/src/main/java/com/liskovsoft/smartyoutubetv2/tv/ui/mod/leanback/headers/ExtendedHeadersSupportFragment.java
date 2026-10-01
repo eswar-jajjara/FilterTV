@@ -25,6 +25,8 @@ public class ExtendedHeadersSupportFragment extends HeadersSupportFragment {
 
     public ExtendedHeadersSupportFragment() {
         Helpers.setField(this, "mAdapterListener", mCustomAdapterListener);
+        // Keep the navigation pill within the rail; selection still animates its alpha.
+        androidx.leanback.widget.FocusHighlightHelper.setupHeaderItemFocusHighlight(getBridgeAdapter(), false);
     }
 
     public void setOnHeaderLongPressedListener(OnHeaderLongPressedListener listener) {

@@ -53,7 +53,8 @@ public class GoogleSignInPresenter extends SignInPresenter {
     @Override
     public void onActionClicked() {
         if (getView() != null) {
-            getView().close();
+            RxHelper.disposeActions(mSignInAction);
+            updateUserCode();
         }
     }
 
@@ -64,7 +65,7 @@ public class GoogleSignInPresenter extends SignInPresenter {
                         error -> {
                             Log.e(TAG, "Sign in error: %s", error.getMessage());
                             if (getView() != null) {
-                                getView().showCode(error.getMessage(), "");
+                                getView().showError(getContext().getString(com.liskovsoft.smartyoutubetv2.common.R.string.filtertv_signin_error));
                             }
                         },
                         () -> {

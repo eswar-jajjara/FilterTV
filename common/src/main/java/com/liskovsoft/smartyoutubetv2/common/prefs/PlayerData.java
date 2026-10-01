@@ -732,7 +732,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
             }
         }
 
-        return formatItem != null ? formatItem : FormatItem.VIDEO_HD_AVC_30;
+        return formatItem != null ? formatItem : FormatItem.VIDEO_FHD_AVC_30;
     }
 
     public FormatItem getDefaultSubtitleFormat() {
@@ -836,7 +836,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
         mRotationAngle = Helpers.parseInt(split, 49, 0);
         mZoomPercents = Helpers.parseInt(split, 50, -1);
         mPlaybackMode = Helpers.parseInt(split, 51, PlayerConstants.PLAYBACK_MODE_ALL);
-        mAudioLanguage = Helpers.parseStr(split, 52, LocaleUtility.getCurrentLanguage(mPrefs.getContext()));
+        mAudioLanguage = Helpers.parseStr(split, 52, ""); // Prefer the video's original audio.
         mSubtitleLanguage = Helpers.parseStr(split, 53, LocaleUtility.getCurrentLanguage(mPrefs.getContext()));
         mEnabledSubtitlesPerChannel = Helpers.parseStrList(split, 54);
         mIsSubtitlesPerChannelEnabled = Helpers.parseBoolean(split, 55, true);
@@ -847,6 +847,20 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
         mLastAudioLanguages = Helpers.parseStrList(split, 60);
         mIsVideoFlipEnabled = Helpers.parseBoolean(split, 61, false);
         mIsAudioDelayEnabled = Helpers.parseBoolean(split, 62, false);
+
+        // Upgrade only the old implicit preset, preserving selected streams and custom presets.
+        boolean migrated = false;
+        if (mVideoFormat != null && !mVideoFormat.isPreset() && mVideoFormat.getFormatId() == null
+                && mVideoFormat.equals(FormatItem.VIDEO_HD_AVC_30)) {
+            mVideoFormat = getDefaultVideoFormat();
+            migrated = true;
+        }
+        if (mLastAudioLanguages.isEmpty()
+                && LocaleUtility.getCurrentLanguage(mPrefs.getContext()).equals(mAudioLanguage)) {
+            mAudioLanguage = "";
+            migrated = true;
+        }
+        if (migrated) persistState();
 
         if (speeds != null) {
             for (String speedSpec : speeds) {

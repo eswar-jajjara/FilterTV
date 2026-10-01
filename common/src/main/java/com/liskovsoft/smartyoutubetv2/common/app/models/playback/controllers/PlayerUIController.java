@@ -807,6 +807,7 @@ public class PlayerUIController extends BasePlayerController {
         return false;
     }
 
+    private long mLastShortsScroll;
     private boolean handleUpDownSkip(int keyCode) {
         if (getPlayer() == null || getPlayer().isOverlayShown() || getVideo() == null ||
                 (getVideo().belongsToShortsGroup() && !getPlayerTweaksData().isQuickSkipShortsAltEnabled() ||
@@ -814,6 +815,12 @@ public class PlayerUIController extends BasePlayerController {
             return false;
         }
 
+        if (getVideo().belongsToShortsGroup() &&
+                (keyCode == KeyEvent.KEYCODE_DPAD_DOWN || keyCode == KeyEvent.KEYCODE_DPAD_UP)) {
+            long now = android.os.SystemClock.elapsedRealtime();
+            if (now - mLastShortsScroll < 350) return true;
+            mLastShortsScroll = now;
+        }
         if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
             getMainController().onNextClicked();
             return true; // hide ui

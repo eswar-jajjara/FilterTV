@@ -302,7 +302,10 @@ public class SplashPresenter extends BasePresenter<SplashView> {
         // Should come last
         mIntentChain.add(intent -> {
             ViewManager viewManager = getViewManager();
-            viewManager.startDefaultView();
+            if (com.liskovsoft.smartyoutubetv2.common.misc.AppResumeState.consumeHome()) {
+                com.liskovsoft.smartyoutubetv2.common.misc.AppResumeState.consumePause();
+                BrowsePresenter.instance(getContext()).selectSection(MediaGroup.TYPE_HOME);
+            } else viewManager.startDefaultView();
 
             // For debug purpose when using ATV bridge.
             if (IntentExtractor.hasData(intent) && !IntentExtractor.isATVChannelUrl(intent) && !IntentExtractor.isRootUrl(intent)) {

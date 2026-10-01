@@ -27,6 +27,8 @@ public class VideoActionPresenter extends BasePresenter<Void> {
             return;
         }
 
+        // A deliberate content selection may play; automatic restoration must stay paused.
+        com.liskovsoft.smartyoutubetv2.common.misc.AppResumeState.consumePause();
         // Show playlist contents in channel instead of instant playback
         if (item.hasVideo() && !item.isBadgePlaylistInChannel()) {
             PlaybackPresenter.instance(getContext()).openVideo(item);

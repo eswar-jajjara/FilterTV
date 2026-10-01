@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.leanback.widget.NonOverlappingLinearLayout
+<com.liskovsoft.smartyoutubetv2.tv.ui.widgets.browse.NavigationRailItemView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="58dp"
+    android:layout_height="46dp"
     android:gravity="center"
     android:orientation="vertical"
     android:paddingTop="6dp"
@@ -13,12 +13,14 @@
         android:id="@+id/header_icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:duplicateParentState="true"
         android:contentDescription="@string/header_icon" />
 
     <com.liskovsoft.smartyoutubetv2.tv.ui.widgets.marqueetextviewcompat.HeaderMarqueeTextViewCompat
         android:id="@+id/header_label"
         android:textSize="10sp"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/filtertv_navigation_text"
+        android:duplicateParentState="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
@@ -31,4 +33,4 @@
         android:scrollHorizontally="true"
 
         style="@style/TextAppearance.Leanback.Header"/>
-</androidx.leanback.widget.NonOverlappingLinearLayout>
+</com.liskovsoft.smartyoutubetv2.tv.ui.widgets.browse.NavigationRailItemView>

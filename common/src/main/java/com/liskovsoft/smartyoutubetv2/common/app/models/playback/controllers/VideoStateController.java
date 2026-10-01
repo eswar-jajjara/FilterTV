@@ -82,7 +82,9 @@ public class VideoStateController extends BasePlayerController {
     @Override
     public boolean onPreviousClicked() {
         // Seek to the start on prev
-        if (getPlayer() != null && getPlayer().getPositionMs() > BEGIN_THRESHOLD_MS) {
+        // Shorts use vertical feed navigation, including after the clip has started.
+        if (getPlayer() != null && (getVideo() == null || !getVideo().belongsToShortsGroup()) &&
+                getPlayer().getPositionMs() > BEGIN_THRESHOLD_MS) {
             saveState(); // in case the user wants to go to previous video
             getPlayer().setPositionMs(100);
             mIsRestoreActualLive = false;
@@ -118,6 +120,7 @@ public class VideoStateController extends BasePlayerController {
 
     @Override
     public void onEngineInitialized() {
+        if (com.liskovsoft.smartyoutubetv2.common.misc.AppResumeState.shouldPause()) setPlayEnabled(false);
         // Reset auto-save history timer
         mTickleCount = 0;
 
@@ -642,6 +645,14 @@ public class VideoStateController extends BasePlayerController {
 
     public void blockPlay(boolean block) {
         mIsPlayBlocked = block;
+    }
+
+    @Override
+    public void onViewResumed() {
+        if (com.liskovsoft.smartyoutubetv2.common.misc.AppResumeState.consumePause()) {
+            setPlayEnabled(false);
+            if (getPlayer() != null) getPlayer().setPlayWhenReady(false);
+        }
     }
 
     public boolean getPlayEnabled() {

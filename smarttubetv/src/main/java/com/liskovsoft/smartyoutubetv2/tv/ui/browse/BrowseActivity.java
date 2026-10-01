@@ -22,6 +22,29 @@ public class BrowseActivity extends LeanbackActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        com.liskovsoft.smartyoutubetv2.common.misc.AppResumeState.consumePause();
+        handleReturnHome();
+    }
+
+    @Override
+    protected void onNewIntent(android.content.Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleReturnHome();
+    }
+
+    private void handleReturnHome() {
+        if (getIntent().getBooleanExtra(com.liskovsoft.smartyoutubetv2.tv.ui.main.AppSessionCallbacks.RETURN_HOME, false)) {
+            getIntent().removeExtra(com.liskovsoft.smartyoutubetv2.tv.ui.main.AppSessionCallbacks.RETURN_HOME);
+            com.liskovsoft.smartyoutubetv2.common.misc.AppResumeState.consumePause();
+            com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter.instance(this)
+                    .selectSection(com.liskovsoft.mediaserviceinterfaces.data.MediaGroup.TYPE_HOME);
+        }
+    }
+
+    @Override
     protected void initTheme() {
         int browseThemeResId = MainUIData.instance(this).getColorScheme().browseThemeResId;
         if (browseThemeResId > 0) {
