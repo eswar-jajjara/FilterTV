@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.tv;
 
 import android.content.Context;
+import com.google.android.exoplayer2.Format;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.ExoFormatItem;
@@ -15,6 +16,15 @@ import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class ResumeAndAudioTest {
+    @Test public void portraitResolutionUsesTheShortEdgeForQualityPresets() {
+        assertEquals(1080, com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil.getRealHeight(
+                new Format.Builder().setWidth(1080).setHeight(1920).build()));
+        assertEquals(720, com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil.getRealHeight(
+                new Format.Builder().setWidth(720).setHeight(1280).build()));
+        assertEquals(1080, com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil.getRealHeight(
+                new Format.Builder().setWidth(1920).setHeight(1080).build()));
+    }
+
     @Test public void homeRequiresFiveCompleteMinutesInBackground() {
         long left = 1_000_000;
         assertFalse(AppResumeState.shouldReturnHome(left, left + 299_999));
