@@ -42,6 +42,7 @@
 
         <LinearLayout
             android:id="@+id/filtertv_search_pill"
+            android:addStatesFromChildren="true"
             android:layout_width="350dp"
             android:layout_height="56dp"
             android:layout_gravity="center_vertical"
@@ -62,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="@string/title_search"
-                android:textColor="#C4C4CC"
+                android:textColor="#EEEEEE"
                 android:textSize="20sp" />
         </LinearLayout>
 
