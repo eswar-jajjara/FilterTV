@@ -72,6 +72,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     private final BrowseProcessorManager mBrowseProcessor;
     private final List<Disposable> mActions;
     private final Runnable mRefreshSection = this::refresh;
+    private final Runnable mLoadFocusedSection = () -> { updateCurrentSection(); restoreSelectedItems(); };
     private BrowseSection mCurrentSection;
     private Video mCurrentVideo;
     private long mLastUpdateTimeMs = -1;
@@ -215,9 +216,13 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     private void initRowAndGridMapping() {
         // A fresh guest profile may have no personalized Home feed. Prefer the
         // mixed public trending feed instead of filling Home with music only.
-        mRowMapping.put(MediaGroup.TYPE_HOME, getContentService().getHomeObserve()
+        Observable<List<MediaGroup>> home = getContentService().getHomeObserve()
                 .switchIfEmpty(getContentService().getTrendingObserve()
-                        .switchIfEmpty(getContentService().getMusicObserve())));
+                        .switchIfEmpty(getContentService().getMusicObserve()));
+        Observable<List<MediaGroup>> shorts = com.liskovsoft.smartyoutubetv2.common.misc.ShortsFeedRepository.observe()
+                .map(group -> Collections.singletonList(group))
+                .onErrorResumeNext(Observable.empty());
+        mRowMapping.put(MediaGroup.TYPE_HOME, Observable.merge(home, shorts));
         mRowMapping.put(MediaGroup.TYPE_TRENDING, getContentService().getTrendingObserve());
         mRowMapping.put(MediaGroup.TYPE_KIDS_HOME, getContentService().getKidsHomeObserve());
         mRowMapping.put(MediaGroup.TYPE_SPORTS, getContentService().getSportsObserve());
@@ -227,7 +232,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mRowMapping.put(MediaGroup.TYPE_GAMING, getContentService().getGamingObserve());
         mRowMapping.put(MediaGroup.TYPE_USER_PLAYLISTS, getContentService().getPlaylistRowsObserve());
 
-        mGridMapping.put(MediaGroup.TYPE_SHORTS, getContentService().getShortsObserve());
+        mGridMapping.put(MediaGroup.TYPE_SHORTS, com.liskovsoft.smartyoutubetv2.common.misc.ShortsFeedRepository.observe());
         mGridMapping.put(MediaGroup.TYPE_SUBSCRIPTIONS, getContentService().getSubscriptionsObserve());
         mGridMapping.put(MediaGroup.TYPE_HISTORY, getContentService().getHistoryObserve());
         mGridMapping.put(MediaGroup.TYPE_CHANNEL_UPLOADS, getContentService().getSubscribedChannelsByNewContentObserve());
@@ -426,6 +431,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         }
 
         mCurrentVideo = item;
+        com.liskovsoft.smartyoutubetv2.common.misc.FocusedVideoPreloader.focus(item);
     }
 
     @Override
@@ -492,10 +498,12 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     @Override
     public void onSectionFocused(int sectionId) {
         saveSelectedItems(); // save previous state
+        disposeActions(); // An old response must not populate the newly focused section.
         mCurrentSection = findSectionById(sectionId);
         mCurrentVideo = null; // fast scroll through the sections (fix empty selected item)
-        updateCurrentSection();
-        restoreSelectedItems(); // Don't place anywhere else
+        Utils.removeCallbacks(mLoadFocusedSection);
+        com.liskovsoft.smartyoutubetv2.common.misc.FocusedVideoPreloader.cancelFocus();
+        Utils.postDelayed(mLoadFocusedSection, 120); // Avoid a request for each repeated remote key.
     }
 
     @Override
@@ -729,6 +737,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         }
 
         AtomicInteger groupIndex = new AtomicInteger(-1);
+        java.util.concurrent.atomic.AtomicBoolean shortsShown = new java.util.concurrent.atomic.AtomicBoolean();
 
         Disposable updateAction = groups
                 .subscribe(
@@ -743,7 +752,11 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                                     continue;
                                 }
 
-                                VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.incrementAndGet());
+                                boolean isHomeShorts = section.getId() == MediaGroup.TYPE_HOME && mediaGroup.getType() == MediaGroup.TYPE_SHORTS;
+                                if (isHomeShorts && shortsShown.getAndSet(true)) continue;
+                                VideoGroup videoGroup = VideoGroup.from(mediaGroup, section,
+                                        isHomeShorts ? 1 : groupIndex.incrementAndGet());
+                                if (isHomeShorts) videoGroup.setTitle(getContext().getString(R.string.header_shorts));
 
                                 if (TextUtils.isEmpty(videoGroup.getTitle())) {
                                     videoGroup.setTitle(getContext().getString(R.string.suggestions));
@@ -921,6 +934,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     private void disposeActions() {
         RxHelper.disposeActions(mActions);
         Utils.removeCallbacks(mRefreshSection);
+        Utils.removeCallbacks(mLoadFocusedSection);
         mLastUpdateTimeMs = -1;
         mBrowseProcessor.dispose();
     }
@@ -1138,6 +1152,8 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     @Override
     public void onAccountChanged(Account account) {
         Log.d(TAG, "On account changed");
+        com.liskovsoft.smartyoutubetv2.common.misc.FocusedVideoPreloader.clear();
+        com.liskovsoft.smartyoutubetv2.common.misc.ShortsFeedRepository.clear();
 
         if (getView() == null) {
             return;
