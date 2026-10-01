@@ -378,7 +378,8 @@ public class TrackSelectorUtil {
         //boolean isUltraWide = (float) width/height >= 2.1; // maybe 2.3???
         //int originHeight = isUltraWide ? getHeightByWidth(width) : getOriginHeight(Math.min(height, width));
         boolean isUltraWide = (float) width/height >= 2; // maybe 2.1
-        int originHeight = isUltraWide ? getHeightByWidth(width) : getOriginHeight(height);
+        // A 1080x1920 portrait stream is 1080p, so a 1080p preset must accept it.
+        int originHeight = isUltraWide ? getHeightByWidth(width) : getOriginHeight(Math.min(height, width));
 
         return originHeight;
     }
