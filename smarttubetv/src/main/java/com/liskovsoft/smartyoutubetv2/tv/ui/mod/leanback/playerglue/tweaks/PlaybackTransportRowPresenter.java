@@ -919,7 +919,7 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
         setSelectEffectEnabled(false);
 
         mPlaybackControlsPresenter = new ControlBarPresenter(com.liskovsoft.smartyoutubetv2.tv.R.layout.lb_control_bar);
-        mPlaybackControlsPresenter.setDefaultFocusToMiddle(false);
+        mPlaybackControlsPresenter.setDefaultFocusToMiddle(true);
         mPlaybackControlsPresenter.setFocusRecovery(true);
         mSecondaryControlsPresenter = new ControlBarPresenter(com.liskovsoft.smartyoutubetv2.tv.R.layout.lb_control_bar);
         mSecondaryControlsPresenter.setDefaultFocusToMiddle(false);
@@ -1104,6 +1104,17 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
         vh.mSecondaryBoundData.mRowViewHolder = vh;
         mSecondaryControlsPresenter.onBindViewHolder(vh.mSecondaryControlsVh,
                 vh.mSecondaryBoundData);
+
+        // Keep custom button sets usable without overlapping the compact default layout.
+        boolean compact = row.getPrimaryActionsAdapter().size() <= 3 && row.getSecondaryActionsAdapter().size() <= 5;
+        boolean splitChannel = compact && row.getSecondaryActionsAdapter().size() > 0
+                && ((Action) row.getSecondaryActionsAdapter().get(0)).getId() == com.liskovsoft.smartyoutubetv2.tv.R.id.action_channel;
+        android.widget.RelativeLayout.LayoutParams secondary = (android.widget.RelativeLayout.LayoutParams) vh.mSecondaryControlsDock.getLayoutParams();
+        secondary.width = splitChannel ? ViewGroup.LayoutParams.MATCH_PARENT : ViewGroup.LayoutParams.WRAP_CONTENT;
+        secondary.removeRule(android.widget.RelativeLayout.BELOW);
+        if (!compact) secondary.addRule(android.widget.RelativeLayout.BELOW, R.id.controls_dock);
+        vh.mSecondaryControlsDock.setLayoutParams(secondary);
+        vh.mSecondaryControlsVh.mControlBar.setSplitLeadingAction(splitChannel);
 
         vh.setTotalTime(row.getDuration());
         vh.setCurrentPosition(row.getCurrentPosition());

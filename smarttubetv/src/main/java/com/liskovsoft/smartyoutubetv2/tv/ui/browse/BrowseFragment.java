@@ -186,6 +186,7 @@ public class BrowseFragment extends BrowseSupportFragment implements BrowseView 
         }
 
         setHeadersState(HEADERS_ENABLED);
+        setPersistentHeadersEnabled(true);
         setHeadersTransitionOnBackEnabled(true);
 
         int brandColorRes = Helpers.getThemeAttr(getContext(), R.attr.brandColor);
@@ -196,7 +197,7 @@ public class BrowseFragment extends BrowseSupportFragment implements BrowseView 
         //setTitle(getString(R.string.browse_title));
 
         // Set fastLane (or headers) background color
-        setBrandColor(ContextCompat.getColor(getContext(), brandColorRes));
+        setBrandColor(android.graphics.Color.rgb(15, 15, 15));
 
         // Set search icon color.
         setSearchAffordanceColor(ContextCompat.getColor(getContext(), R.color.filtertv_search_orb));

@@ -52,7 +52,36 @@ public class ComplexImageView extends RelativeLayout {
         init();
     }
 
+    private final android.graphics.Paint mFocusPaint = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+
+    @Override
+    protected void dispatchDraw(android.graphics.Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if (isSelected()) {
+            float stroke = 3 * getResources().getDisplayMetrics().density;
+            float radius = 10 * getResources().getDisplayMetrics().density;
+            mFocusPaint.setColor(Color.WHITE);
+            mFocusPaint.setStyle(android.graphics.Paint.Style.STROKE);
+            mFocusPaint.setStrokeWidth(stroke);
+            canvas.drawRoundRect(stroke / 2, stroke / 2, getWidth() - stroke / 2,
+                    getHeight() - stroke / 2, radius, radius, mFocusPaint);
+        }
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        super.setSelected(selected);
+        invalidate();
+    }
+
     private void init() {
+        setOutlineProvider(new android.view.ViewOutlineProvider() {
+            @Override public void getOutline(View view, android.graphics.Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(),
+                        10 * getResources().getDisplayMetrics().density);
+            }
+        });
+        setClipToOutline(true);
         inflate(getContext(), R.layout.text_badge_image_view, this);
         mMainImage = findViewById(R.id.main_image);
         mBadgeText = findViewById(R.id.extra_text_badge);

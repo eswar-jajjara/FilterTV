@@ -37,6 +37,31 @@ class ControlBar extends LinearLayout {
     private static int sSharedFocusIndex = -1;
     private boolean mIsSharedFocusEnabled = true;
     private boolean mDefaultFocusToMiddle = true;
+    private int mDefaultActionIndex = -1;
+    private boolean mSplitLeadingAction;
+
+    void setDefaultActionIndex(int index) { mDefaultActionIndex = index; }
+
+    void setSplitLeadingAction(boolean split) {
+        mSplitLeadingAction = split;
+        ViewGroup.LayoutParams params = getLayoutParams();
+        params.width = split ? ViewGroup.LayoutParams.MATCH_PARENT : ViewGroup.LayoutParams.WRAP_CONTENT;
+        setLayoutParams(params);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (!mSplitLeadingAction || getChildCount() < 2) return;
+        View leading = getChildAt(0);
+        leading.layout(0, leading.getTop(), leading.getMeasuredWidth(), leading.getBottom());
+        int end = getWidth();
+        for (int i = getChildCount() - 1; i > 0; i--) {
+            View child = getChildAt(i);
+            child.layout(end - child.getMeasuredWidth(), child.getTop(), end, child.getBottom());
+            end -= child.getMeasuredWidth();
+        }
+    }
     private boolean mFocusRecovery = true;
 
     public ControlBar(Context context, AttributeSet attrs) {
@@ -72,6 +97,7 @@ class ControlBar extends LinearLayout {
     }
 
     int getDefaultFocusIndex() {
+        if (mDefaultActionIndex >= 0 && mDefaultActionIndex < getChildCount()) return mDefaultActionIndex;
         return mDefaultFocusToMiddle ? getChildCount() / 2 : 0;
     }
 
@@ -128,7 +154,7 @@ class ControlBar extends LinearLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (mChildMarginFromCenter <= 0) {
+        if (mSplitLeadingAction || mChildMarginFromCenter <= 0) {
             return;
         }
 

@@ -34,6 +34,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.upstream.RequestUrlGate;
 import com.google.android.exoplayer2.util.Util;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.sharedutils.cronet.CronetManager;
@@ -65,6 +66,12 @@ public class ExoMediaSourceFactory {
     private static final String DASH_MANIFEST_EXTENSION = "mpd";
     private static final String HLS_PLAYLIST_EXTENSION = "m3u8";
     private static final boolean USE_BANDWIDTH_METER = false;
+    // Player restarts create new factories; keep their callbacks on one reusable worker.
+    private static final java.util.concurrent.Executor CRONET_CALLBACKS = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r, "FilterTV-media-callbacks");
+        thread.setDaemon(true);
+        return thread;
+    });
     private TrackErrorFixer mTrackErrorFixer;
     private DataSource.Factory mMediaDataSourceFactory;
 
@@ -126,8 +133,14 @@ public class ExoMediaSourceFactory {
         PlayerTweaksData tweaksData = PlayerTweaksData.instance(mContext);
         int source = tweaksData.getPlayerDataSource();
         DefaultBandwidthMeter bandwidthMeter = useBandwidthMeter ? BANDWIDTH_METER : null;
-        // One media transport prevents alternate data sources bypassing the filter.
-        return buildOkHttpDataSourceFactory(bandwidthMeter);
+        if (source == PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP) {
+            return buildOkHttpDataSourceFactory(bandwidthMeter);
+        }
+        RequestUrlGate gate = com.liskovsoft.smartyoutubetv2.common.filter.FilterNetwork.mediaGate(mContext);
+        if (source == PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET && CronetManager.getEngine(mContext) != null) {
+            return buildCronetDataSourceFactory(bandwidthMeter, gate);
+        }
+        return buildDefaultHttpDataSourceFactory(bandwidthMeter, gate);
     }
 
     @SuppressWarnings("deprecation")
@@ -280,17 +293,18 @@ public class ExoMediaSourceFactory {
         return dataSourceFactory;
     }
 
-    private HttpDataSource.Factory buildCronetDataSourceFactory(DefaultBandwidthMeter bandwidthMeter) {
+    private HttpDataSource.Factory buildCronetDataSourceFactory(DefaultBandwidthMeter bandwidthMeter, RequestUrlGate gate) {
         CronetDataSourceFactory dataSourceFactory =
                 new CronetDataSourceFactory(
                         new CronetEngineWrapper(CronetManager.getEngine(mContext)),
-                        Executors.newSingleThreadExecutor(),
+                        CRONET_CALLBACKS,
                         null,
                         bandwidthMeter,
                         (int) OkHttpManager.getConnectTimeoutMs(),
                         (int) OkHttpManager.getReadTimeoutMs(),
                         true,
-                        USER_AGENT);
+                        buildDefaultHttpDataSourceFactory(bandwidthMeter, gate));
+        dataSourceFactory.setRequestUrlGate(gate);
         addCommonHeaders(dataSourceFactory);
         return dataSourceFactory;
     }
@@ -298,10 +312,12 @@ public class ExoMediaSourceFactory {
     /**
      * Use built-in component for networking
      */
-    private HttpDataSource.Factory buildDefaultHttpDataSourceFactory(DefaultBandwidthMeter bandwidthMeter) {
+    private HttpDataSource.Factory buildDefaultHttpDataSourceFactory(DefaultBandwidthMeter bandwidthMeter, RequestUrlGate gate) {
         DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory(
                 USER_AGENT, bandwidthMeter, (int) OkHttpManager.getConnectTimeoutMs(),
                 (int) OkHttpManager.getReadTimeoutMs(), true); // allowCrossProtocolRedirects = true
+
+        dataSourceFactory.setRequestUrlGate(gate);
 
         addCommonHeaders(dataSourceFactory); // cause troubles for some users
         return dataSourceFactory;

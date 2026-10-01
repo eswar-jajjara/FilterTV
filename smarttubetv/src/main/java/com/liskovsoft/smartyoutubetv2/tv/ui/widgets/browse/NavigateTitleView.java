@@ -149,11 +149,11 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         mBrandingVisibility = (flags & BRANDING_VIEW_VISIBLE) == BRANDING_VIEW_VISIBLE
                 ? View.VISIBLE : View.INVISIBLE;
 
-        if (mIsSearchOrbEnabled) {
+        if (!mIsSearchOrbEnabled) {
             mSearchOrbView.setVisibility(View.GONE);
         }
 
-        mSearchPill.setVisibility(mIsSearchOrbEnabled ? View.GONE : mSearchVisibility);
+        if (mSearchPill != null) mSearchPill.setVisibility(mIsSearchOrbEnabled ? mSearchVisibility : View.GONE);
 
         if (mIsAccountViewEnabled) {
             mAccountView.setVisibility(mSearchVisibility);
@@ -197,6 +197,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
 
         mSearchOrbView = findViewById(R.id.title_orb);
         mSearchPill = findViewById(R.id.filtertv_search_pill);
+        if (mSearchPill != null) mSearchPill.setOnClickListener(v -> mSearchOrbView.performClick());
 
         mAccountView = findViewById(R.id.account_orb);
         mAccountView.setOnOrbClickedListener(v -> AccountSelectionPresenter.instance(getContext()).nextAccountOrDialog());
@@ -230,7 +231,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
     private void updateButtonsVisibility() {
         MainUIData mainUIData = MainUIData.instance(getContext());
 
-        mIsSearchOrbEnabled = !mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_SEARCH);
+        mIsSearchOrbEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_SEARCH);
         mIsAccountViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_BROWSE_ACCOUNTS);
         mIsLanguageViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_CHANGE_LANGUAGE);
         // Keep browsing focused on videos; the playback clock preference is
@@ -238,7 +239,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         mIsGlobalClockEnabled = false;
 
         mSearchOrbView.setVisibility(mIsSearchOrbEnabled ? View.VISIBLE : View.GONE);
-        mSearchPill.setVisibility(mIsSearchOrbEnabled ? View.GONE : mSearchVisibility);
+        if (mSearchPill != null) mSearchPill.setVisibility(mIsSearchOrbEnabled ? mSearchVisibility : View.GONE);
         mAccountView.setVisibility(mIsAccountViewEnabled ? View.VISIBLE : View.GONE);
         mLanguageView.setVisibility(mIsLanguageViewEnabled ? View.VISIBLE : View.GONE);
         mGlobalClock.setVisibility(mIsGlobalClockEnabled ? View.VISIBLE : View.GONE);

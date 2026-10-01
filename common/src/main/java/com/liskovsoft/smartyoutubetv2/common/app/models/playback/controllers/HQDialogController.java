@@ -18,8 +18,6 @@ import java.util.Set;
 
 public class HQDialogController extends BasePlayerController {
     private static final String TAG = HQDialogController.class.getSimpleName();
-    private static final int VIDEO_FORMATS_ID = 132;
-    private static final int AUDIO_FORMATS_ID = 133;
     // NOTE: using map, because same item could be changed time to time
     private final Map<Integer, OptionCategory> mCategories = new LinkedHashMap<>();
     private final Map<Integer, OptionCategory> mCategoriesInt = new LinkedHashMap<>();
@@ -44,12 +42,17 @@ public class HQDialogController extends BasePlayerController {
     }
 
     private void onHighQualityClicked() {
+        if (getPlayer() == null) return;
         fitVideoIntoDialog();
 
-        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_quality), item -> showFormatDialog(true)));
-        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_captions), item -> showCaptionsDialog()));
-        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_audio), item -> showFormatDialog(false)));
-        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_speed), item -> {
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_quality),
+                formatSummary(getPlayer().getVideoFormat()), item -> showFormatDialog(true)));
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_captions),
+                formatSummary(getPlayer().getSubtitleFormat()), item -> showCaptionsDialog()));
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_audio),
+                formatSummary(getPlayer().getAudioFormat()), item -> showFormatDialog(false)));
+        mAppDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.filtertv_speed),
+                getPlayer().getSpeed() + "×", item -> {
             mAppDialogPresenter.appendCategory(AppDialogUtil.createSpeedListCategory(getContext(), getPlayer()));
             mAppDialogPresenter.showDialog();
         }));
@@ -64,6 +67,13 @@ public class HQDialogController extends BasePlayerController {
         mAppDialogPresenter.showDialog(getContext().getString(R.string.filtertv_player_settings), this::onDialogHide);
     }
 
+    private CharSequence formatSummary(FormatItem format) {
+        if (format == null) return "";
+        if (format.isDefault()) return getContext().getString(R.string.option_disabled);
+        if (format.getType() == FormatItem.TYPE_VIDEO && format.getHeight() > 0) return format.getHeight() + "p";
+        return format.getTitle();
+    }
+
     private void showFormatDialog(boolean video) {
         if (getPlayer() == null) {
             return;
@@ -71,7 +81,7 @@ public class HQDialogController extends BasePlayerController {
         List<FormatItem> formats = video ? getPlayer().getVideoFormats() : getPlayer().getAudioFormats();
         String title = getContext().getString(video ? R.string.filtertv_quality : R.string.filtertv_audio);
         mAppDialogPresenter.appendRadioCategory(title,
-                UiOptionItem.from(formats, this::selectFormatOption, getContext().getString(R.string.filtertv_auto)));
+                UiOptionItem.from(formats, this::selectFormatOption, getContext().getString(R.string.option_disabled)));
         mAppDialogPresenter.showDialog();
     }
 
@@ -89,7 +99,6 @@ public class HQDialogController extends BasePlayerController {
     }
 
     private void showAdvancedSettings() {
-        mCategories.clear();
         mCategoriesInt.clear();
 
         addAudioLanguage();
@@ -106,29 +115,6 @@ public class HQDialogController extends BasePlayerController {
         appendOptions(mCategories);
 
         mAppDialogPresenter.showDialog();
-    }
-
-    private void addQualityCategories() {
-        if (getPlayer() == null) {
-            return;
-        }
-
-        List<FormatItem> videoFormats = getPlayer().getVideoFormats();
-        String videoFormatsTitle = getContext().getString(R.string.title_video_formats);
-
-        List<FormatItem> audioFormats = getPlayer().getAudioFormats();
-        String audioFormatsTitle = getContext().getString(R.string.title_audio_formats);
-
-        addCategoryInt(OptionCategory.from(
-                VIDEO_FORMATS_ID,
-                OptionCategory.TYPE_RADIO_LIST,
-                videoFormatsTitle,
-                UiOptionItem.from(videoFormats, this::selectFormatOption, getContext().getString(R.string.option_disabled))));
-        addCategoryInt(OptionCategory.from(
-                AUDIO_FORMATS_ID,
-                OptionCategory.TYPE_RADIO_LIST,
-                audioFormatsTitle,
-                UiOptionItem.from(audioFormats, this::selectFormatOption, getContext().getString(R.string.option_disabled))));
     }
 
     private void selectFormatOption(OptionItem option) {

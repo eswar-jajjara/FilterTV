@@ -263,7 +263,9 @@ public class SidebarService implements ProfileChangeListener {
                     MediaGroup.TYPE_NOTIFICATIONS,
                     MediaGroup.TYPE_PLAYBACK_QUEUE,
                     MediaGroup.TYPE_TRENDING,
-                    MediaGroup.TYPE_BLOCKED_CHANNELS
+                    MediaGroup.TYPE_BLOCKED_CHANNELS, MediaGroup.TYPE_CHANNEL_UPLOADS,
+                    MediaGroup.TYPE_KIDS_HOME, MediaGroup.TYPE_SPORTS, MediaGroup.TYPE_LIVE,
+                    MediaGroup.TYPE_GAMING, MediaGroup.TYPE_NEWS, MediaGroup.TYPE_MUSIC, MediaGroup.TYPE_MY_VIDEOS
             }));
         }
     }
@@ -306,6 +308,19 @@ public class SidebarService implements ProfileChangeListener {
         enableSection(MediaGroup.TYPE_SETTINGS, true);
 
         cleanupPinnedItems();
+        java.util.Set<Integer> legacy = new java.util.HashSet<>(mDefaultSections.values());
+        legacy.remove(MediaGroup.TYPE_NOTIFICATIONS);
+        legacy.remove(MediaGroup.TYPE_PLAYBACK_QUEUE);
+        legacy.remove(MediaGroup.TYPE_TRENDING);
+        legacy.remove(MediaGroup.TYPE_BLOCKED_CHANNELS);
+        boolean untouched = mPinnedItems.size() == legacy.size();
+        for (Video item : mPinnedItems) {
+            untouched &= item != null && legacy.remove(item.sectionId);
+        }
+        if (untouched && legacy.isEmpty()) {
+            mPinnedItems.clear();
+            initPinnedItems();
+        }
     }
 
     private void transferOldPinnedItems() {

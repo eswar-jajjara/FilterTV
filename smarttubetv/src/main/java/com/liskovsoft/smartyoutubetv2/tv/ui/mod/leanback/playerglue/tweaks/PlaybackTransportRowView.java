@@ -79,6 +79,8 @@ public class PlaybackTransportRowView extends LinearLayout {
         if (focused != null && focused.requestFocus(direction, previouslyFocusedRect)) {
             return true;
         }
+        View controls = findViewById(R.id.controls_dock);
+        if (controls != null && controls.hasFocusable() && controls.requestFocus(direction, previouslyFocusedRect)) return true;
         View progress = findViewById(R.id.playback_progress);
         if (progress != null && progress.isFocusable()) {
             if (progress.requestFocus(direction, previouslyFocusedRect)) {
