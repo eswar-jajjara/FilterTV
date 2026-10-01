@@ -3,8 +3,8 @@
     <!-- Default, same as xhdpi -->
     <!-- 320dpi, Amazon Fire TV Stick -->
 
-    <dimen name="card_width">200dp</dimen>
-    <dimen name="card_height">110dp</dimen>
+    <dimen name="card_width">260dp</dimen>
+    <dimen name="card_height">146dp</dimen>
     <!-- text_badge_image_view.xml, default: 12sp -->
     <dimen name="card_badge_text_size">14sp</dimen>
 
@@ -53,7 +53,7 @@
     <!-- Increase this value to hide left strip from Browse fragment (when headers collapsed) -->
     <!-- Old value: 238dp -->
     <dimen name="lb_browse_rows_margin_start">96dp</dimen>
-    <dimen name="lb_browse_headers_width">96dp</dimen>
+    <dimen name="lb_browse_headers_width">88dp</dimen>
 
     <!-- Make search bar more compact so more buttons could be added after it. -->
     <dimen name="lb_search_bar_items_width">600dp</dimen>
@@ -102,7 +102,7 @@
 
     <!-- Browse headers spacing. Origin: 21dp -->
     <!--<dimen name="lb_browse_headers_vertical_spacing">10dp</dimen>-->
-    <dimen name="browse_headers_vertical_spacing">10dp</dimen>
+    <dimen name="browse_headers_vertical_spacing">2dp</dimen>
 
     <!-- Vine card widget values -->
     <dimen name="lb_basic_card_main_width">140dp</dimen>
@@ -135,4 +135,6 @@
     <dimen name="tooltip_vertical_padding_mod">6.5dp</dimen>
     <dimen name="tooltip_y_offset_non_touch_mod">0dp</dimen>
     <dimen name="tooltip_y_offset_touch_mod">16dp</dimen>
+    <dimen name="lb_browse_header_padding_end">0dp</dimen>
+    <dimen name="lb_browse_header_fading_length">0dp</dimen>
 </resources>

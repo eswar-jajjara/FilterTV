@@ -10,7 +10,7 @@
     <color name="fastlane_background_dark">#004B53</color>
     <color name="default_light_grey">#343434</color>
     <color name="search_opaque">#0096a6</color>
-    <color name="filtertv_search_orb">#404048</color>
+    <color name="filtertv_search_orb">#282828</color>
     <color name="search_opaque_yellow">#ffaa3f</color>
 
     <!-- Card view colors -->
@@ -34,7 +34,7 @@
     <!-- Dark color scheme -->
     <color name="scheme_grey_background">#181818</color>
     <color name="scheme_grey_background_dark">#181818</color>
-    <color name="scheme_grey_shelf_background_dark">#000000</color>
+    <color name="scheme_grey_shelf_background_dark">#0F0F0F</color>
     <color name="scheme_grey_card_background_dark">#121212</color>
 
     <!-- Red color scheme -->
@@ -61,8 +61,8 @@
     <color name="foreground_material_light_mod">@android:color/black</color>
 
     <!-- Default Orb buttons colors: search, accounts, search settings etc -->
-    <color name="orb_color">@color/grey</color>
-    <color name="orb_bright_color">@color/grey</color>
+    <color name="orb_color">#282828</color>
+    <color name="orb_bright_color">#383838</color>
     <color name="orb_icon_color">@color/white</color>
 
     <!-- Search page mic button color -->
