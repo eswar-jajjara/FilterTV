@@ -18,11 +18,11 @@ import static org.junit.Assert.*;
 public class ResumeAndAudioTest {
     @Test public void portraitResolutionUsesTheShortEdgeForQualityPresets() {
         assertEquals(1080, com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil.getRealHeight(
-                new Format.Builder().setWidth(1080).setHeight(1920).build()));
+                Format.createVideoSampleFormat(null, null, null, -1, -1, 1080, 1920, 30, null, null)));
         assertEquals(720, com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil.getRealHeight(
-                new Format.Builder().setWidth(720).setHeight(1280).build()));
+                Format.createVideoSampleFormat(null, null, null, -1, -1, 720, 1280, 30, null, null)));
         assertEquals(1080, com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil.getRealHeight(
-                new Format.Builder().setWidth(1920).setHeight(1080).build()));
+                Format.createVideoSampleFormat(null, null, null, -1, -1, 1920, 1080, 30, null, null)));
     }
 
     @Test public void homeRequiresFiveCompleteMinutesInBackground() {
