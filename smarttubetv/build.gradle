@@ -57,7 +57,7 @@ android {
         applicationId "app.smarttube"
         minSdkVersion project.properties.minSdkVersion
         targetSdkVersion project.properties.targetSdkVersion
-        versionCode 2449
+        versionCode 2450
         versionName "32.59"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
@@ -169,7 +169,7 @@ android {
         }
         stfdroid {
             applicationId "io.github.filtertv.app"
-            versionNameSuffix "-filtertv.2"
+            versionNameSuffix "-filtertv.3"
             minSdkVersion 21
             targetSdkVersion project.properties.compileSdkVersion
 
@@ -221,6 +221,7 @@ dependencies {
     testImplementation 'junit:junit:' + junitVersion
     testImplementation 'org.robolectric:robolectric:' + robolectricVersion
     androidTestImplementation 'androidx.test.ext:junit:' + testXSupportVersion
+    androidTestImplementation project(':exoplayer-extension-cronet')
     androidTestImplementation 'androidx.test.ext:truth:' + testXSupportVersion
     androidTestImplementation 'androidx.test:runner:' + testXSupportVersion
     androidTestImplementation 'androidx.test:rules:' + testXSupportVersion
