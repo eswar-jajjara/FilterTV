@@ -4,4 +4,5 @@ public interface SignInView {
     void showCode(String userCode, String signInUrl);
     void showCode(String userCode, String signInUrl, String fullSignInUrl);
     void close();
+    default void showError(String message) { showCode(message, ""); }
 }
