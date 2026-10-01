@@ -44,6 +44,13 @@ public class ClickbaitRemover {
             return video.getCardImageUrl();
         }
 
-        return updateThumbnail(video.getCardImageUrl(), thumbQuality);
+        String url = updateThumbnail(video.getCardImageUrl(), thumbQuality);
+        // Upgrade only standard YouTube video thumbnails. Live, Shorts, DeArrow and
+        // custom frame choices retain their source. The presenter falls back on HTTP failure.
+        if (thumbQuality == THUMB_QUALITY_DEFAULT && !video.isShorts && url != null
+                && (url.startsWith("https://i.ytimg.com/vi/") || url.startsWith("https://i.ytimg.com/vi_webp/"))) {
+            url = url.replace("/mqdefault.", "/hq720.").replace("/hqdefault.", "/hq720.");
+        }
+        return url;
     }
 }
