@@ -138,12 +138,19 @@ class ControlBarPresenter extends Presenter {
 
             // TODO: modified
             // Decrease margin between player's buttons
-            return getChildMarginDefault(context) + getControlIconWidth(context) / 3;
+            return getChildMarginDefault(context) + getControlIconWidth(context);
         }
 
         void showControls(Presenter presenter) {
             ObjectAdapter adapter = getDisplayedAdapter();
             int adapterSize = adapter == null ? 0 : adapter.size();
+            mControlBar.setDefaultActionIndex(-1);
+            for (int i = 0; i < adapterSize; i++) {
+                if (adapter.get(i) instanceof androidx.leanback.widget.PlaybackControlsRow.PlayPauseAction) {
+                    mControlBar.setDefaultActionIndex(i);
+                    break;
+                }
+            }
             // Shrink the number of attached views
             View focusedView = mControlBar.getFocusedChild();
             if (focusedView != null && adapterSize > 0
