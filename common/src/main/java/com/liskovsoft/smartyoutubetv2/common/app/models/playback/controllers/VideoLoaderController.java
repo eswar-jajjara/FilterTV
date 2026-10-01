@@ -257,7 +257,7 @@ public class VideoLoaderController extends BasePlayerController {
 
         ServiceManager service = YouTubeServiceManager.instance();
         MediaItemService mediaItemManager = service.getMediaItemService();
-        mFormatInfoAction = mediaItemManager.getFormatInfoObserve(video.videoId)
+        mFormatInfoAction = com.liskovsoft.smartyoutubetv2.common.misc.FocusedVideoPreloader.playback(video.videoId)
                 .subscribe(this::processFormatInfo,
                            error -> {
                                getPlayer().showProgressBar(false);

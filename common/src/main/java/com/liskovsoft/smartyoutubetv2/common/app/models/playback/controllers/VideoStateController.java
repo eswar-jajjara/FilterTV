@@ -118,6 +118,7 @@ public class VideoStateController extends BasePlayerController {
 
     @Override
     public void onEngineInitialized() {
+        if (com.liskovsoft.smartyoutubetv2.common.misc.AppResumeState.shouldPause()) setPlayEnabled(false);
         // Reset auto-save history timer
         mTickleCount = 0;
 
@@ -642,6 +643,14 @@ public class VideoStateController extends BasePlayerController {
 
     public void blockPlay(boolean block) {
         mIsPlayBlocked = block;
+    }
+
+    @Override
+    public void onViewResumed() {
+        if (com.liskovsoft.smartyoutubetv2.common.misc.AppResumeState.consumePause()) {
+            setPlayEnabled(false);
+            if (getPlayer() != null) getPlayer().setPlayWhenReady(false);
+        }
     }
 
     public boolean getPlayEnabled() {
