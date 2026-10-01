@@ -48,9 +48,13 @@ The Brave parser supports network rules from Adblock Plus/uBlock syntax. Unsuppo
 
 ## Request path
 
-ExoPlayer HTTP media requests → OkHttp application gate → Brave network matcher → redirect-aware network gate → server.
+ExoPlayer HTTP media requests → selected transport (Cronet, OkHttp, or Java HTTP) → Brave request gate → server. Each transport also checks redirect destinations; Cronet's Java fallback carries the same gate.
 
-Initial blocks happen before DNS. Redirect blocks happen before HTTP bytes are sent, but OkHttp may already have established a connection. Cached responses still pass the initial gate. Metadata, artwork, account, casting and other upstream requests are outside this filter. All media transports are forced to OkHttp; upstream alternate-transport settings therefore have no effect in this prototype. Ads stitched into an allowed video stream cannot be removed by network filtering. Blocking a shared video/ad endpoint may also break playback, so custom rules should be tested carefully.
+Initial blocks happen before DNS. Redirect blocks happen before HTTP bytes are sent, but OkHttp may already have established a connection. Cached responses still pass the initial gate. Metadata, artwork, account, casting and other upstream requests are outside this filter. Network-engine preferences are respected. Ads stitched into an allowed video stream cannot be removed by network filtering. Blocking a shared video/ad endpoint may also break playback, so custom rules should be tested carefully.
+
+The compact TV layout uses larger rounded thumbnails, a persistent six-item rail, thumbnail-only focus outlines, a top-left player title, and grouped controls. Untouched legacy defaults migrate to the compact layout; custom sidebar and player-button selections are preserved. Card shadows are disabled and obsolete duplicate image-loading code is removed. Cronet callbacks reuse one worker across player restarts. These changes reduce avoidable rendering and thread overhead; they do not guarantee a particular startup time or repair every upstream YouTube client failure.
+
+For a smaller download, choose an ABI-specific APK only when your TV's CPU architecture is known. The universal APK includes all three supported architectures. Deleting unrelated source files does not make an installed app faster.
 
 ## Compatibility and validation
 
@@ -59,6 +63,8 @@ Build minimum: Android 5.0 / API 21. Configured native targets: ARMv7, ARM64 and
 Run `python tools/test-filter.py` for initial-request and redirect gate tests against a local HTTP server, and `cargo test --manifest-path bravefilter/Cargo.toml --locked` for Brave rule and exception matching. Before distributing, test D-pad navigation, sign-in, search, live/VOD playback, pause/seek, captions, background/resume, filtering with real lists, and update installation on real devices. Do not claim compatibility from compilation alone.
 
 ## Updates and publishing
+
+Android transport and JNI checks run with `./gradlew :smarttubetv:connectedStfdroidDebugAndroidTest` on a connected test device or emulator. The tests use a local server to verify initial blocks, blocked redirects, allowed redirects and operation without a gate, plus the packaged Brave library's matching through JNI. Use an isolated test profile with the default personal rule. Live service availability, sign-in, and performance on physical TVs require separate testing.
 
 The fork does not install upstream SmartTube APK updates. Merge upstream source fixes and rebuild this app. Publish to your own repository with the source and license notices intact. GitHub build artifacts expire; a release needs an intentionally signed APK and release notes. Never commit keystores, local.properties or account data.
 
