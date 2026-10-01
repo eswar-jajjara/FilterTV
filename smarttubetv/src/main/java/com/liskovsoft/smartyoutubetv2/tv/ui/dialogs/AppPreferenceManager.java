@@ -118,6 +118,7 @@ public class AppPreferenceManager {
             Preference preference = new Preference(mContext);
             preference.setPersistent(false);
             preference.setTitle(item.getTitle());
+            preference.setSummary(item.getDescription());
             preference.setOnPreferenceClickListener(pref -> {
                 item.onSelect(true);
                 return true;
