@@ -25,6 +25,7 @@ import com.google.android.exoplayer2.upstream.BaseDataSource;
 import com.google.android.exoplayer2.upstream.DataSourceException;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
+import com.google.android.exoplayer2.upstream.RequestUrlGate;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Clock;
 import com.google.android.exoplayer2.util.ConditionVariable;
@@ -120,6 +121,7 @@ public class CronetDataSource extends BaseDataSource implements HttpDataSource {
   private final boolean handleSetCookieRequests;
   private final RequestProperties defaultRequestProperties;
   private final RequestProperties requestProperties;
+  @Nullable private RequestUrlGate requestUrlGate;
   private final ConditionVariable operation;
   private final Clock clock;
 
@@ -282,6 +284,11 @@ public class CronetDataSource extends BaseDataSource implements HttpDataSource {
     operation = new ConditionVariable();
   }
 
+  /** Sets a gate for the initial URL and every redirect before Cronet follows it. */
+  public void setRequestUrlGate(@Nullable RequestUrlGate requestUrlGate) {
+    this.requestUrlGate = requestUrlGate;
+  }
+
   // HttpDataSource implementation.
 
   @Override
@@ -325,6 +332,9 @@ public class CronetDataSource extends BaseDataSource implements HttpDataSource {
     resetConnectTimeout();
     currentDataSpec = dataSpec;
     try {
+      if (requestUrlGate != null) {
+        requestUrlGate.checkRequest(dataSpec.uri.toString(), dataSpec.getHttpMethodString());
+      }
       currentUrlRequest = buildRequestBuilder(dataSpec).build();
     } catch (IOException e) {
       throw new OpenException(e, currentDataSpec, Status.IDLE);
@@ -665,6 +675,19 @@ public class CronetDataSource extends BaseDataSource implements HttpDataSource {
           exception =
               new InvalidResponseCodeException(
                   responseCode, info.getHttpStatusText(), info.getAllHeaders(), currentDataSpec);
+          operation.open();
+          return;
+        }
+      }
+      if (requestUrlGate != null) {
+        try {
+          requestUrlGate.checkRequest(
+              newLocationUrl,
+              currentDataSpec.httpMethod == DataSpec.HTTP_METHOD_POST
+                  ? "GET" : currentDataSpec.getHttpMethodString());
+        } catch (IOException e) {
+          exception = e;
+          request.cancel();
           operation.open();
           return;
         }

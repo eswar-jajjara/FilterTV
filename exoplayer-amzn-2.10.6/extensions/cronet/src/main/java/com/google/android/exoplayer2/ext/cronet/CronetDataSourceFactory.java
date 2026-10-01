@@ -21,6 +21,7 @@ import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.HttpDataSource.BaseFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource.Factory;
 import com.google.android.exoplayer2.upstream.HttpDataSource.InvalidContentTypeException;
+import com.google.android.exoplayer2.upstream.RequestUrlGate;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Predicate;
 import java.util.concurrent.Executor;
@@ -51,6 +52,7 @@ public final class CronetDataSourceFactory extends BaseFactory {
   private final int readTimeoutMs;
   private final boolean resetTimeoutOnRedirects;
   private final HttpDataSource.Factory fallbackFactory;
+  private @Nullable RequestUrlGate requestUrlGate;
 
   /**
    * Constructs a CronetDataSourceFactory.
@@ -328,6 +330,12 @@ public final class CronetDataSourceFactory extends BaseFactory {
     this.fallbackFactory = fallbackFactory;
   }
 
+  /** Sets a gate for Cronet requests. The supplied fallback factory must be gated separately. */
+  public CronetDataSourceFactory setRequestUrlGate(@Nullable RequestUrlGate requestUrlGate) {
+    this.requestUrlGate = requestUrlGate;
+    return this;
+  }
+
   @Override
   protected HttpDataSource createDataSourceInternal(HttpDataSource.RequestProperties
       defaultRequestProperties) {
@@ -344,6 +352,7 @@ public final class CronetDataSourceFactory extends BaseFactory {
             readTimeoutMs,
             resetTimeoutOnRedirects,
             defaultRequestProperties);
+    dataSource.setRequestUrlGate(requestUrlGate);
     if (transferListener != null) {
       dataSource.addTransferListener(transferListener);
     }
