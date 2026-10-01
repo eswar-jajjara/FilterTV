@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import com.google.android.exoplayer2.upstream.RequestUrlGate;
 import okhttp3.OkHttpClient;
 
 /** App-owned media request gate. Lists compile away from the UI thread. */
@@ -35,6 +36,13 @@ public final class FilterNetwork {
     });
     public static final AtomicLong blocked = new AtomicLong();
     public static final AtomicLong evaluated = new AtomicLong();
+    private static final RequestUrlGate MEDIA_GATE = (url, method) -> {
+        evaluated.incrementAndGet();
+        if (FilterNetwork.enabled && FilterNetwork.ready && BraveFilterEngine.shouldBlock(url, method)) {
+            blocked.incrementAndGet();
+            throw new IOException("FilterTV blocked media request");
+        }
+    };
     private static volatile boolean enabled;
     private static volatile boolean ready;
     private static volatile String status = "Starting";
@@ -81,6 +89,12 @@ public final class FilterNetwork {
     }
 
     public static boolean testUrl(String url) { return ready && BraveFilterEngine.shouldBlock(url, "GET"); }
+
+    /** Shared gate for ExoPlayer transports that do not use OkHttp interceptors. */
+    public static RequestUrlGate mediaGate(Context context) {
+        load(context);
+        return MEDIA_GATE;
+    }
 
     public static OkHttpClient wrap(Context context, OkHttpClient client) {
         load(context);
