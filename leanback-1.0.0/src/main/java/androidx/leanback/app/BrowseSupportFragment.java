@@ -724,6 +724,12 @@ public class BrowseSupportFragment extends BaseSupportFragment {
     boolean mShowingHeaders = true;
     boolean mCanShowHeaders = true;
     private int mContainerListMarginStart;
+    private boolean mPersistentHeadersEnabled;
+
+    /** Keeps the compact navigation rail visible while content has focus. */
+    public void setPersistentHeadersEnabled(boolean enabled) {
+        mPersistentHeadersEnabled = enabled;
+    }
     private int mContainerListAlignTop;
     private boolean mMainFragmentScaleEnabled = true;
     OnItemViewSelectedListener mExternalOnItemViewSelectedListener;
@@ -1451,26 +1457,26 @@ public class BrowseSupportFragment extends BaseSupportFragment {
         View containerList;
         containerList = mHeadersSupportFragment.getView();
         lp = (MarginLayoutParams) containerList.getLayoutParams();
-        lp.setMarginStart(onScreen ? 0 : -mContainerListMarginStart);
+        lp.setMarginStart(onScreen || mPersistentHeadersEnabled ? 0 : -mContainerListMarginStart);
         containerList.setLayoutParams(lp);
     }
 
     void showHeaders(boolean show) {
         if (DEBUG) Log.v(TAG, "showHeaders " + show);
-        mHeadersSupportFragment.setHeadersEnabled(show);
+        mHeadersSupportFragment.setHeadersEnabled(show || mPersistentHeadersEnabled);
         setHeadersOnScreen(show);
         expandMainFragment(!show);
     }
 
     private void expandMainFragment(boolean expand) {
         MarginLayoutParams params = (MarginLayoutParams) mScaleFrameLayout.getLayoutParams();
-        params.setMarginStart(!expand ? mContainerListMarginStart : 0);
+        params.setMarginStart(!expand || mPersistentHeadersEnabled ? mContainerListMarginStart : 0);
         mScaleFrameLayout.setLayoutParams(params);
         mMainFragmentAdapter.setExpand(expand);
 
         setMainFragmentAlignment();
         final float scaleFactor = !expand
-                && mMainFragmentScaleEnabled
+                && !mPersistentHeadersEnabled && mMainFragmentScaleEnabled
                 && mMainFragmentAdapter.isScalingEnabled() ? mScaleFactor : 1;
         mScaleFrameLayout.setLayoutScaleY(scaleFactor);
         mScaleFrameLayout.setChildScale(scaleFactor);
