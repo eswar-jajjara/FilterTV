@@ -1464,6 +1464,9 @@ public class BrowseSupportFragment extends BaseSupportFragment {
         if (mPersistentHeadersEnabled) {
             lp.width = onScreen ? getResources().getDimensionPixelSize(R.dimen.lb_browse_headers_width)
                     : (int) (64 * getResources().getDisplayMetrics().density + 0.5f);
+            VerticalGridView headersGrid = mHeadersSupportFragment.getVerticalGridView();
+            if (headersGrid != null) headersGrid.setColumnWidth(Math.max(1,
+                    lp.width - headersGrid.getPaddingLeft() - headersGrid.getPaddingRight()));
         }
         containerList.setLayoutParams(lp);
     }
