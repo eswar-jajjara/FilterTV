@@ -92,6 +92,15 @@ public class SignInFragment extends GuidedStepSupportFragment implements SignInV
     }
 
     @Override
+    public void showError(String message) {
+        if (getContext() == null) return;
+        mFullSignInUrl = null;
+        getGuidanceStylist().getTitleView().setText(getString(R.string.signin_view_title));
+        getGuidanceStylist().getDescriptionView().setText(message);
+        getGuidanceStylist().getIconView().setImageResource(R.mipmap.app_icon);
+    }
+
+    @Override
     public void close() {
         if (getActivity() != null) {
             getActivity().finish();
@@ -110,7 +119,7 @@ public class SignInFragment extends GuidedStepSupportFragment implements SignInV
     public void onCreateActions(@NonNull List<GuidedAction> actions, Bundle savedInstanceState) {
         GuidedAction login = new GuidedAction.Builder()
                 .id(CONTINUE)
-                .title(getString(R.string.signin_view_action_text))
+                .title(getString(R.string.filtertv_get_new_code))
                 .build();
         GuidedAction openBrowser = new GuidedAction.Builder()
                 .id(OPEN_BROWSER)
