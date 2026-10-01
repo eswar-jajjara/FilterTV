@@ -87,6 +87,7 @@ public class MainApplication extends MultiDexApplication { // fix: Didn't find c
         // Warm the filter before the first player request. List downloads and
         // compilation stay on the background worker rather than the UI thread.
         FilterNetwork.load(this);
+        registerActivityLifecycleCallbacks(new AppSessionCallbacks(this));
     }
 
     private void setupViewManager() {
