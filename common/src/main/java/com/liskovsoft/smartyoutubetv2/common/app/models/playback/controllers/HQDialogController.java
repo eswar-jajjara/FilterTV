@@ -70,13 +70,17 @@ public class HQDialogController extends BasePlayerController {
     private CharSequence formatSummary(FormatItem format) {
         if (format == null) return "";
         if (format.isDefault()) return getContext().getString(R.string.option_disabled);
-        if (format.getType() == FormatItem.TYPE_VIDEO && format.getHeight() > 0) return format.getHeight() + "p";
+        if (format.getType() == FormatItem.TYPE_VIDEO && format.getHeight() > 0) return resolution(format) + "p";
         if (format.getType() == FormatItem.TYPE_AUDIO) {
             String language = format.getLanguage();
             if (language == null || language.isEmpty()) return getContext().getString(R.string.filtertv_original_audio);
             return language;
         }
         return format.getTitle();
+    }
+
+    private static int resolution(FormatItem format) {
+        return format.getWidth() > 0 ? Math.min(format.getWidth(), format.getHeight()) : format.getHeight();
     }
 
     private void showFormatDialog(boolean video) {
@@ -89,13 +93,13 @@ public class HQDialogController extends BasePlayerController {
             java.util.Map<Integer, FormatItem> resolutions = new java.util.LinkedHashMap<>();
             if (formats != null) for (FormatItem format : formats) {
                 if (format.isDefault() || format.getHeight() <= 0) continue;
-                FormatItem previous = resolutions.get(format.getHeight());
-                if (previous == null || format.isSelected()) resolutions.put(format.getHeight(), format);
+                FormatItem previous = resolutions.get(resolution(format));
+                if (previous == null || format.isSelected()) resolutions.put(resolution(format), format);
             }
             List<OptionItem> options = new java.util.ArrayList<>();
             for (FormatItem format : resolutions.values()) {
                 OptionItem detailed = UiOptionItem.from(format, this::selectFormatOption);
-                options.add(UiOptionItem.from(format.getHeight() + "p", ignored -> selectFormatOption(detailed), format.isSelected()));
+                options.add(UiOptionItem.from(resolution(format) + "p", ignored -> selectFormatOption(detailed), format.isSelected()));
             }
             mAppDialogPresenter.appendRadioCategory(title, options);
         } else {
